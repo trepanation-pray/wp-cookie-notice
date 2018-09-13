@@ -17,7 +17,7 @@ add_action( 'admin_init', 'cookie_notice_settings_settings_init' );
 
 function cookie_notice_settings_add_admin_menu(  ) {
 
-    add_options_page( 'Cookie Notice', 'Cookie Notice', 'manage_options', 'pentascape_cookie_notice', 'cookie_notice_settings_options_page' );
+    add_options_page( 'Cookie Notice', 'Cookie Notice', 'manage_options', 'cookie_notice', 'cookie_notice_settings_options_page' );
 
 }
 
