@@ -2,7 +2,7 @@
 /*
    Plugin Name: Simple Cookie Notice
    Description: EU compliant cookie notice
-   Version: 18.03.21
+   Version: 18.11.09
    Author: Steven Hill
    Author URI: http://www.stevenhill.io
    License: GPL2
@@ -160,7 +160,8 @@ function cookie_notice_html(  ) {
         $cookie_notice_link = $options['cookie_notice_settings_text_field_1'];
         $cookie_notice_text_colour = $options['cookie_notice_settings_text_field_2'];
         $cookie_notice_background_colour = $options['cookie_notice_settings_text_field_3'];
-
+        $cookie_notice_url_encode_text_colour =  urlencode($cookie_notice_text_colour);
+        
         //Construct the HTML
         $output = '<div id="cookie-notice" class="cookie-notice-container">';
         $output .= '<span class="mobile-text">'.$cookie_notice_mobile_text.'</span>';
@@ -170,7 +171,8 @@ function cookie_notice_html(  ) {
         $output .= '</div>';
 
         //Styling
-        $output .= '<style>.cookie-notice-container {position: fixed; z-index: 999999; font-size: 14px; font-family: sans-serif; line-height: 1.5; bottom: 0; left: 0; width: 100%; padding: 10px 45px 10px 10px; box-shadow: 0 0 15px rgba(0,0,0,.25), 0 0 5px rgba(0,0,0,.5); color: white; background: '.$cookie_notice_background_colour.';}.cookie-notice-link {text-decoration: underline; color: '.$cookie_notice_text_colour.'; transition: .3s;}.cookie-notice-link:hover {opacity: 0.5; color: white;} .cookie-notice-close {position: absolute; transform: translatey(-50%); top: 50%; right: 6px; height: 30px; width: 30px; text-indent: -9999px; border: 2px solid '.$cookie_notice_text_colour.'; background: url(\'data:image/svg+xml;charset=utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="'.$cookie_notice_text_colour.'" d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z"/></svg>\') center no-repeat; background-size: 13px 13px; border-radius: 50%; overflow: hidden; transition: .3s;} .cookie-notice-close:hover {opacity: 0.5;}.full-text {display: none;}@media (min-width: 680px) {.mobile-text {display: none;}.full-text {display: inline;}}</style>';
+        $output .= '<style>.cookie-notice-container {position: fixed; z-index: 999999; font-size: 14px; font-family: sans-serif; line-height: 1.5; bottom: 0; left: 0; width: 100%; padding: 10px 45px 10px 10px; box-shadow: 0 0 15px rgba(0,0,0,.25), 0 0 5px rgba(0,0,0,.5); color: white; background: '.$cookie_notice_background_colour.';}.cookie-notice-link {text-decoration: underline; color: '.$cookie_notice_text_colour.'; transition: .3s;}.cookie-notice-link:hover {opacity: 0.5; color: white;} .cookie-notice-close {position: absolute; transform: translatey(-50%); top: 50%; right: 6px; height: 30px; width: 30px; text-indent: -9999px; border: 2px solid '.$cookie_notice_text_colour.'; background: url(\'data:image/svg+xml;charset=utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="'.$cookie_notice_url_encode_text_colour.'" d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z"/></svg>\') center no-repeat; background-size: 13px 13px; border-radius: 50%; overflow: hidden; transition: .3s;} .cookie-notice-close:hover {opacity: 0.5;}.full-text {display: none;}@media (min-width: 680px) {.mobile-text {display: none;}.full-text {display: inline;}}</style>';
+
 
         //Javascript - set cookie
         $output .= '<script>function cookieFunc(){document.cookie = "cookie-notice=acknowledged cookie use; expires=Thu, 1 Jan 2099 12:00:00 GMT; path=/";document.getElementById("cookie-notice").remove()}</script>';
