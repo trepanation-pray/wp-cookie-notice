@@ -2,7 +2,7 @@
 /*
   Plugin Name: Simple Cookie Notice
   Description: EU compliant cookie notice
-  Version: 1.5
+  Version: 1.5.1
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
@@ -202,14 +202,14 @@ function cookie_notice_html(  ) {
     if ( $cookie_notice_link ) {
       $output .= ' <a href="'.$cookie_notice_link.'" class="o-cookie-notice__link" onclick="cookieFunc();">Find out more</a>';
     }
-    $output .= '<a class="o-cookie-notice__close" title="Close this notice" onclick="cookieFunc();">Close notice</a>';
+    $output .= '<button class="o-cookie-notice__close" title="Close this notice" onclick="cookieFunc();">Close notice</button>';
     $output .= '</div>';
 
     //Styling
     $output .= '<style>.o-cookie-notice {position: fixed; z-index: 999999; font-size: 14px; font-family: sans-serif; line-height: 1.5; bottom: 0; left: 0; width: 100%; padding: 10px 45px 10px 10px; color: '.$cookie_notice_text_colour.'; background: '.$cookie_notice_background_colour.';}.o-cookie-notice__link {text-decoration: underline; color: '.$cookie_notice_text_colour.'; transition: .3s;}.o-cookie-notice__link:hover {opacity: 0.5; text-decoration: none; color: '.$cookie_notice_text_colour.';} .o-cookie-notice__close {position: absolute; transform: translatey(-50%); top: 50%; right: 6px; height: 30px; width: 30px; text-indent: -9999px; border: 2px solid '.$cookie_notice_text_colour.'; background: url(\'data:image/svg+xml;charset=utf8,'.cookie_notice_close_svg($cookie_notice_text_colour).'\') center no-repeat; background-size: 13px 13px; border-radius: 50%; overflow: hidden; transition: .3s;} .o-cookie-notice__close:hover {background-image: url(\'data:image/svg+xml;charset=utf8,'.cookie_notice_close_svg($cookie_notice_background_colour).'\'); background-color: '.$cookie_notice_text_colour.'; transform: translatey(-50%) scale(.8) }.o-cookie-notice__full-text {display: none;}@media (min-width: 680px) {.o-cookie-notice__mobile-text {display: none;}.o-cookie-notice__full-text {display: inline;}}</style>';
 
     //Javascript - set cookie and body offset
-    $output .= '<script>document.body.style.marginBottom = document.getElementById("js-cookie-notice").clientHeight + "px"; function cookieFunc(){document.cookie = "cookie-notice=acknowledged cookie use; expires=Thu, 1 Jan 2099 12:00:00 GMT; path=/";document.getElementById("js-cookie-notice").remove();document.body.style.marginBottom = "0";}</script>';
+    $output .= '<script>cookieNoticeElement = document.getElementById("js-cookie-notice"); document.body.style.marginBottom = cookieNoticeElement.clientHeight + "px"; function cookieFunc(){document.cookie = "cookie-notice=acknowledged cookie use; expires=Thu, 1 Jan 2099 12:00:00 GMT; path=/";cookieNoticeElement.parentNode.removeChild(cookieNoticeElement);document.body.style.marginBottom = "0";}</script>';
 
     //Output the html
     echo $output;
