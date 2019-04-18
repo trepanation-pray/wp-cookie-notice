@@ -2,7 +2,7 @@
 /*
   Plugin Name: Simple Cookie Notice
   Description: EU compliant cookie notice
-  Version: 1.5.1
+  Version: 1.6.0
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
@@ -34,20 +34,14 @@ function cookie_notice_settings_settings_init(  ) {
   );
 
   add_settings_field(
-    'cookie_notice_settings_text_field_0',
-    __( 'Cookie notice mobile text', 'Cookie Notice Settings' ),
-    'cookie_notice_settings_text_field_0_render',
-    'pluginPage',
-    'cookie_notice_settings_pluginPage_section'
-  );
-
-  add_settings_field(
     'cookie_notice_settings_text_field_4',
     __( 'Cookie notice full text', 'Cookie Notice Settings' ),
     'cookie_notice_settings_text_field_4_render',
     'pluginPage',
     'cookie_notice_settings_pluginPage_section'
   );
+
+  // update_option( 'my_plugin_version', '1.0.0' );
 
   add_settings_field(
     'cookie_notice_settings_text_field_1',
@@ -61,6 +55,14 @@ function cookie_notice_settings_settings_init(  ) {
     'cookie_notice_settings_text_field_2',
     __( 'Foreground colour', 'Cookie Notice Settings' ),
     'cookie_notice_settings_text_field_2_render',
+    'pluginPage',
+    'cookie_notice_settings_pluginPage_section'
+  );
+
+  add_settings_field(
+    'cookie_notice_settings_text_field_5',
+    __( 'Link colour', 'Cookie Notice Settings' ),
+    'cookie_notice_settings_text_field_5_render',
     'pluginPage',
     'cookie_notice_settings_pluginPage_section'
   );
@@ -99,6 +101,15 @@ function cookie_notice_settings_text_field_4_render(  ) {
   $options = get_option( 'cookie_notice_settings_settings' );
   ?>
   <textarea class="regular-text" rows="5" name='cookie_notice_settings_settings[cookie_notice_settings_text_field_4]'><?php echo $options['cookie_notice_settings_text_field_4']; ?></textarea>
+  <?php
+
+}
+
+function cookie_notice_settings_text_field_5_render(  ) {
+
+  $options = get_option( 'cookie_notice_settings_settings' );
+  ?>
+  <input type='text' class="regular-text" name='cookie_notice_settings_settings[cookie_notice_settings_text_field_5]' value='<?php echo $options['cookie_notice_settings_text_field_5']; ?>'>
   <?php
 
 }
@@ -157,16 +168,9 @@ function cookie_notice_html(  ) {
 
     //Set desktop text
     if( $options['cookie_notice_settings_text_field_4'] ) {
-      $cookie_notice_full_text = $options['cookie_notice_settings_text_field_4'];
+      $cookie_notice_text = $options['cookie_notice_settings_text_field_4'];
     } else {
-      $cookie_notice_full_text = 'This website uses cookies for essential functionality and to improve your user experience. By using this website you are giving your consent for us to set cookies.';
-    }
-
-    //Set mobile text
-    if( $options['cookie_notice_settings_text_field_0'] ) {
-      $cookie_notice_mobile_text = $options['cookie_notice_settings_text_field_0'];
-    } else {
-      $cookie_notice_mobile_text = 'This website uses cookies.';
+      $cookie_notice_text = 'This website uses cookies for essential functionality and to improve your user experience. By using this website you are giving your consent for us to set cookies.';
     }
 
     //Set read more link
@@ -183,6 +187,13 @@ function cookie_notice_html(  ) {
       $cookie_notice_text_colour = 'white';
     }
 
+    //Set link colour
+    if( $options['cookie_notice_settings_text_field_5'] ) {
+      $cookie_notice_link_colour = $options['cookie_notice_settings_text_field_5'];
+    } else {
+      $cookie_notice_link_colour = '#11ccab';
+    }
+
     //Set background colour
     if( $options['cookie_notice_settings_text_field_3'] ) {
       $cookie_notice_background_colour = $options['cookie_notice_settings_text_field_3'];
@@ -197,19 +208,18 @@ function cookie_notice_html(  ) {
     
     //Construct the HTML
     $output = '<div id="js-cookie-notice" class="o-cookie-notice">';
-    $output .= '<span class="o-cookie-notice__mobile-text">'.$cookie_notice_mobile_text.'</span>';
-    $output .= '<span class="o-cookie-notice__full-text">'.$cookie_notice_full_text.'</span>';
+    $output .= '<p class="o-cookie-notice__text">'.$cookie_notice_text.'</p>';
     if ( $cookie_notice_link ) {
-      $output .= ' <a href="'.$cookie_notice_link.'" class="o-cookie-notice__link" onclick="cookieFunc();">Find out more</a>';
+      $output .= ' <a href="'.$cookie_notice_link.'" class="o-cookie-notice__link" onclick="cookieFunc();">Find out more<span class="o-cookie-notice__screen-reader"> about our cookie policy</span></a>';
     }
-    $output .= '<button class="o-cookie-notice__close" title="Close this notice" onclick="cookieFunc();">Close notice</button>';
+    $output .= '<button class="o-cookie-notice__close" aria-label="Close this notice" onclick="cookieFunc();">Close notice</button>';
     $output .= '</div>';
 
     //Styling
-    $output .= '<style>.o-cookie-notice {position: fixed; z-index: 999999; font-size: 14px; font-family: sans-serif; line-height: 1.5; bottom: 0; left: 0; width: 100%; padding: 10px 45px 10px 10px; color: '.$cookie_notice_text_colour.'; background: '.$cookie_notice_background_colour.';}.o-cookie-notice__link {text-decoration: underline; color: '.$cookie_notice_text_colour.'; transition: .3s;}.o-cookie-notice__link:hover {opacity: 0.5; text-decoration: none; color: '.$cookie_notice_text_colour.';} .o-cookie-notice__close {position: absolute; transform: translatey(-50%); top: 50%; right: 6px; height: 30px; width: 30px; text-indent: -9999px; border: 2px solid '.$cookie_notice_text_colour.'; background: url(\'data:image/svg+xml;charset=utf8,'.cookie_notice_close_svg($cookie_notice_text_colour).'\') center no-repeat; background-size: 13px 13px; border-radius: 50%; overflow: hidden; transition: .3s;} .o-cookie-notice__close:hover {background-image: url(\'data:image/svg+xml;charset=utf8,'.cookie_notice_close_svg($cookie_notice_background_colour).'\'); background-color: '.$cookie_notice_text_colour.'; transform: translatey(-50%) scale(.8) }.o-cookie-notice__full-text {display: none;}@media (min-width: 680px) {.o-cookie-notice__mobile-text {display: none;}.o-cookie-notice__full-text {display: inline;}}</style>';
+    $output .= '<style>.o-cookie-notice {transition: .5s; transform: translateY(50px); opacity: 0; position: fixed; z-index: 999999; font-size: 14px; font-family: sans-serif; line-height: 1.5; bottom: 0; left: 0; width: 100%; padding: 10px 45px 10px 10px; color: '.$cookie_notice_text_colour.'; background: '.$cookie_notice_background_colour.';}.o-cookie-notice.active {transform: translateY(0); opacity: 1; }.o-cookie-notice__link {display: inline-block; font-weight: bold; text-decoration: none; padding: 7px 10px; border-radius: 4px; background: '.$cookie_notice_link_colour.'; border: 2px solid '.$cookie_notice_link_colour.'; color: '.$cookie_notice_text_colour.'; transition: .3s;} .o-cookie-notice__link:hover {text-decoration: none; background: none; color: '.$cookie_notice_link_colour.';}  .o-cookie-notice__close {position: absolute; top: 10px; right: 10px; height: 30px; width: 30px; text-indent: -9999px; border: 2px solid '.$cookie_notice_text_colour.'; background: url(\'data:image/svg+xml;charset=utf8,'.cookie_notice_close_svg($cookie_notice_text_colour).'\') center no-repeat; background-size: 13px 13px; border-radius: 50%; overflow: hidden; transition: .3s;} .o-cookie-notice__close:hover {background-image: url(\'data:image/svg+xml;charset=utf8,'.cookie_notice_close_svg($cookie_notice_background_colour).'\'); background-color: '.$cookie_notice_text_colour.'; transform: scale(.8) }.o-cookie-notice__screen-reader { clip: rect(1px, 1px, 1px, 1px); clip-path: inset(50%); height: 1px; width: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; } @media (min-width: 680px) {.o-cookie-notice {font-size: 16px;max-width: 400px; border-radius: 5px; bottom: 10px; left: 10px; padding: 20px 45px 20px 20px; } }</style>';
 
     //Javascript - set cookie and body offset
-    $output .= '<script>cookieNoticeElement = document.getElementById("js-cookie-notice"); document.body.style.marginBottom = cookieNoticeElement.clientHeight + "px"; function cookieFunc(){document.cookie = "cookie-notice=acknowledged cookie use; expires=Thu, 1 Jan 2099 12:00:00 GMT; path=/";cookieNoticeElement.parentNode.removeChild(cookieNoticeElement);document.body.style.marginBottom = "0";}</script>';
+    $output .= '<script>cookieNoticeElement = document.getElementById("js-cookie-notice"); document.body.style.marginBottom = cookieNoticeElement.clientHeight + "px"; function cookieFunc(){document.cookie = "cookie-notice=acknowledged cookie use; expires=Thu, 1 Jan 2099 12:00:00 GMT; path=/"; document.getElementById("js-cookie-notice").classList.remove("active"); setTimeout(function () { cookieNoticeElement.parentNode.removeChild(cookieNoticeElement);document.body.style.marginBottom = "0";}, 500);} document.getElementById("js-cookie-notice").classList.add("active");</script>';
 
     //Output the html
     echo $output;
