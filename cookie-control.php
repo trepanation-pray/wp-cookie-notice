@@ -33,13 +33,6 @@ function cookie_control_settings_settings_init(  ) {
     'pluginPage'
   );
 
-  add_settings_section(
-    'cookie_control_settings_usage_pluginPage_section',
-    __( '<h2>Requirements and Usage</h2>', 'Cookie Control Settings' ),
-    'cookie_control_settings_usage_section_callback',
-    'pluginUsagePage'
-  );
-
   add_settings_field(
     'cookie_control_settings_text_field_2',
     __( 'Title', 'Cookie Control Settings' ),
@@ -134,30 +127,6 @@ function cookie_control_settings_settings_section_callback(  ) {
   echo __( '<p>The EU law now imposes that a communications provider must get consent from the user when storing or accessing information. This includes the use of cookies.</p><p>If no values are set predefined defaults will be used.</p>', 'Cookie Control Settings' );
 
 }
-function cookie_control_settings_usage_section_callback(  ) {
-
-  echo '<p>Required functions and shortcodes</p>'
-      .'<h3>Cookie control page shortcodes</h3>'
-      .'<p>You are required to have root page with the slug <code>cookies</code></p>'
-      .'<p>Output the tracking cookies options.</p>'
-      .'<pre><code>[tracking_cookies]</code></pre>'
-      .'<p>Output the essential cookies options.</p>'
-      .'<pre><code>[essential_cookies]</code></pre>'
-      .'<p>Output save preferences button.</p>'
-      .'<pre><code>[save_preferences_button class="CUSTOM-BUTTON-CLASSES"]</code></pre>'
-      .'<p>Output clear all cookies button.</p>'
-      .'<pre><code>[clear_cookies_button class="CUSTOM-BUTTON-CLASSES]</code></pre>'
-      .'<h3>Template functions</h3>'
-      .'<p>Output the cookie notice in the template. Place just after "skip to content".</p>'
-      .'<pre><code>cookie_control_notice()</code></pre>'
-      .'<p>Function to check if cookies are set for either "tracking" or "essential" returns a boolean response accordingly.</p>'
-      .'<pre><code>cookie_control("tracking")</code></pre>'
-      .'<p>Example usage.</p>'
-      .'<pre><code style="display: block">if(cookie_control("tracking")):<br>//Code here only displays if user has accepted tracking cookies.<br>endif;</code></pre>'
-      .'';
-
-}
-
 
 function cookie_control_settings_options_page(  ) {
 
@@ -168,7 +137,6 @@ function cookie_control_settings_options_page(  ) {
       settings_fields( 'pluginPage' );
       do_settings_sections( 'pluginPage' );
       submit_button();
-      do_settings_sections( 'pluginUsagePage' );
       ?>
     </div>
   </form>
@@ -250,7 +218,7 @@ function cookie_control_notice( ) {
           $output .= ' <button class="cookie-control-notice__button cookie-control-notice__button--reject js-cookie-control-accept">Reject additional cookies</button></p>';
         endif;
 
-        $output .= '<p><a href="'.$cookie_control_link.'" class="cookie-control-notice__link">View cookie controls</a></p>';
+        $output .= '<p><a href="'.$cookie_control_link.'" class="cookie-control-notice__link">View cookie controls and policy</a></p>';
 
       $output .= '</div>';
     $output .= '</div>';
