@@ -9,6 +9,39 @@
 */
 
 
+// Create cookie control page
+function create_cookie_control_page() {
+
+  // Check if cookies page exists
+  if( !get_page_by_title('Cookies', 'OBJECT', 'page') ):
+
+    $content = file_get_contents('cookies-page-content.php',true);
+
+    $page = [
+      'post_type'     => 'page',
+      'post_title'    => 'Cookies',
+      'post_content'  => $content,
+      'post_status'   => 'publish',
+      'post_author'   => 1
+    ];
+
+    // Insert the post into the database
+    wp_insert_post( $page );
+
+  endif;
+} 
+
+// add_action( 'init', 'create_cookie_control_page' );
+
+
+// Activate the plugin.
+function pluginprefix_activate() { 
+    create_cookie_control_page(); 
+}
+register_activation_hook( __FILE__, 'pluginprefix_activate' );
+
+
+
 //Settings Page
 
 add_action( 'admin_menu', 'cookie_control_settings_add_admin_menu' );
@@ -124,7 +157,7 @@ function cookie_control_settings_text_field_4_render(  ) {
 
 function cookie_control_settings_settings_section_callback(  ) {
 
-  echo __( '<p>The EU law now imposes that a communications provider must get consent from the user when storing or accessing information. This includes the use of cookies.</p><p>If no values are set predefined defaults will be used.</p>', 'Cookie Control Settings' );
+  echo __( '<p>The EU law now imposes that a communications provider must get consent from the user when storing or accessing information. This includes the use of cookies.</p><p>If no values are set predefined defaults will be used.</p><p>Code and template references can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice#readme" target="_blank">here</a></p>', 'Cookie Control Settings' );
 
 }
 

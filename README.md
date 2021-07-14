@@ -18,7 +18,7 @@ Output save preferences button.
 
 Output clear all cookies button.
 
-`[clear_cookies_button class="CUSTOM-BUTTON-CLASSES]`
+`[clear_cookies_button class="CUSTOM-BUTTON-CLASSES"]`
 
 ## Template functions
 
