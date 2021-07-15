@@ -65,7 +65,7 @@ document.body.addEventListener("click", function (event) {
   if (!event.target.matches(".cookie-control-clear-all-button")) return;
   event.preventDefault();
   event.target.classList.add('loading');
-  fetch('/app/plugins/cookie-control/clear-cookies.php')
+  fetch('/app/plugins/wp-cookie-notice/clear-cookies.php')
     .then(window.location.assign('/cookies'));
 
 }, false);

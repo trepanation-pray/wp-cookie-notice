@@ -2,7 +2,7 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 2.0.0
+  Version: 2.0.2
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
@@ -15,12 +15,10 @@ function create_cookie_control_page() {
   // Check if cookies page exists
   if( !get_page_by_title('Cookies', 'OBJECT', 'page') ):
 
-    $content = file_get_contents('cookies-page-content.php',true);
-
     $page = [
       'post_type'     => 'page',
       'post_title'    => 'Cookies',
-      'post_content'  => $content,
+      'post_content'  => '',
       'post_status'   => 'publish',
       'post_author'   => 1
     ];
@@ -31,10 +29,9 @@ function create_cookie_control_page() {
   endif;
 } 
 
-// add_action( 'init', 'create_cookie_control_page' );
-
 
 // Activate the plugin.
+
 function pluginprefix_activate() { 
     create_cookie_control_page(); 
 }
@@ -149,15 +146,21 @@ function cookie_control_settings_text_field_6_render(  ) {
 function cookie_control_settings_text_field_4_render(  ) {
 
   $options = get_option( 'cookie_control_settings_settings' );
+
+    if( $options['cookie_control_settings_text_field_4'] ) {
+      $cookie_control_text = $options['cookie_control_settings_text_field_4'];
+    } else {
+      $cookie_control_text = 'We use some essential cookies to make this website work.'.PHP_EOL.PHP_EOL.'We’d like to set additional cookies to understand how you use the website, remember your settings and improve you services.'.PHP_EOL.PHP_EOL.'We also use cookies set by other sites to help us deliver content from their services.';
+    }
   ?>
-  <textarea class="regular-text" rows="5" name='cookie_control_settings_settings[cookie_control_settings_text_field_4]'><?php echo $options['cookie_control_settings_text_field_4']; ?></textarea>
+  <textarea class="regular-text" rows="5" name='cookie_control_settings_settings[cookie_control_settings_text_field_4]'><?= $cookie_control_text ?></textarea>
   <?php
 
 }
 
 function cookie_control_settings_settings_section_callback(  ) {
 
-  echo __( '<p>The EU law now imposes that a communications provider must get consent from the user when storing or accessing information. This includes the use of cookies.</p><p>If no values are set predefined defaults will be used.</p><p>Code and template references can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice#readme" target="_blank">here</a></p>', 'Cookie Control Settings' );
+  echo __( '<p>The EU law now imposes that a communications provider must get consent from the user when storing or accessing information. This includes the use of cookies.</p><p>If no values are set predefined defaults will be used.</p><p>Code and template references can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice#readme" target="_blank">here</a></p><p>Default Page content wigth controls can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice/blob/master/cookies-page-content.html" target="_blank">here</a></p>', 'Cookie Control Settings' );
 
 }
 
@@ -223,6 +226,7 @@ function cookie_control_notice( ) {
     }
     //Set desktop text
     $cookie_control_text = $options['cookie_control_settings_text_field_4'];
+    
     $cookie_control_text = str_replace("\n\r", "</p>\n<p>", $cookie_control_text);
     $cookie_control_text = "<p>" . $cookie_control_text . "</p>";
     
@@ -251,7 +255,7 @@ function cookie_control_notice( ) {
           $output .= ' <button class="cookie-control-notice__button cookie-control-notice__button--reject js-cookie-control-accept">Reject additional cookies</button></p>';
         endif;
 
-        $output .= '<p><a href="'.$cookie_control_link.'" class="cookie-control-notice__link">View cookie controls and policy</a></p>';
+        $output .= '<p><a href="'.get_home_url().$cookie_control_link.'" class="cookie-control-notice__link">View cookie controls and policy</a></p>';
 
       $output .= '</div>';
     $output .= '</div>';
