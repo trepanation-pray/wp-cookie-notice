@@ -2,7 +2,7 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 2.0.2
+  Version: 2.0.3
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
@@ -318,14 +318,14 @@ add_shortcode('essential_cookies', 'essential_cookies');
 
 
 function save_preferences_button($class = null) {
-  $output = '<p><button class="cookie-control-save-button '.implode($class).'">Save preferences</button></p>';
+  $output = '<button class="cookie-control-save-button '.implode($class).'">Save preferences</button>';
   return $output;
 }
 
 add_shortcode('save_preferences_button', 'save_preferences_button');
 
 function clear_cookies_button($class = null) {
-  $output = '<p><button class="cookie-control-clear-all-button '.implode($class).'">Clear all cookies</button></p>';
+  $output = '<button class="cookie-control-clear-all-button '.implode($class).'">Clear all cookies</button>';
   return $output;
 }
 
