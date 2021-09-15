@@ -166,7 +166,7 @@ function cookie_control_settings_text_field_4_render(  ) {
 
 function cookie_control_settings_settings_section_callback(  ) {
 
-  echo __( '<p>The EU law now imposes that a communications provider must get consent from the user when storing or accessing information. This includes the use of cookies.</p><p>If no values are set predefined defaults will be used.</p><p>Code and template references can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice#readme" target="_blank">here</a></p><p>Default Page content wigth controls can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice/blob/master/cookies-page-content.html" target="_blank">here</a></p>', 'Cookie Control Settings' );
+  echo __( '<p>The EU law now imposes that a communications provider must get consent from the user when storing or accessing information. This includes the use of cookies.</p><p>If no values are set predefined defaults will be used.</p><p>Code and template references can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice#readme" target="_blank">here</a></p><p>Default Page content with controls can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice/blob/master/cookies-page-content.html" target="_blank">here</a></p>', 'Cookie Control Settings' );
 
 }
 
