@@ -86,7 +86,7 @@ document.body.addEventListener("click", function (event) {
 
   setCookieSettings("cookieControlTracking", cookieControlTrackingValue);
   setCookieSettings("cookieControlEssential", cookieControlEssentialValue);
-  window.location.assign('/cookies');
+  window.location.assign(window.location.pathname.slice(0, -1));
 
 }, false);
 
@@ -98,7 +98,7 @@ document.body.addEventListener("click", function (event) {
   event.preventDefault();
   event.target.classList.add('loading');
   fetch('/app/plugins/wp-cookie-notice/clear-cookies.php')
-    .then(window.location.assign('/cookies'));
+    .then(window.location.assign(window.location.pathname.slice(0, -1)));
 
 }, false);
 
