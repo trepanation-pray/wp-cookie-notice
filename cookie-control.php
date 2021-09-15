@@ -2,42 +2,11 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 2.0.3
+  Version: 2.1.0
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
 */
-
-
-// Create cookie control page
-function create_cookie_control_page() {
-
-  // Check if cookies page exists
-  if( !get_page_by_title('Cookies', 'OBJECT', 'page') ):
-
-    $page = [
-      'post_type'     => 'page',
-      'post_title'    => 'Cookies',
-      'post_content'  => '',
-      'post_status'   => 'publish',
-      'post_author'   => 1
-    ];
-
-    // Insert the post into the database
-    wp_insert_post( $page );
-
-  endif;
-} 
-
-
-// Activate the plugin.
-
-function pluginprefix_activate() { 
-    create_cookie_control_page(); 
-}
-register_activation_hook( __FILE__, 'pluginprefix_activate' );
-
-
 
 //Settings Page
 
@@ -79,6 +48,13 @@ function cookie_control_settings_settings_init(  ) {
     'cookie_control_settings_pluginPage_section'
   );
   add_settings_field(
+    'cookie_control_settings_text_field_5',
+    __( 'Select preferences page', 'Cookie Control Settings' ),
+    'cookie_control_settings_text_field_5_render',
+    'pluginPage',
+    'cookie_control_settings_pluginPage_section'
+  );
+  add_settings_field(
     'cookie_control_settings_text_field_6',
     __( 'Show/Hide reject button', 'Cookie Control Settings' ),
     'cookie_control_settings_text_field_6_render',
@@ -107,10 +83,40 @@ function cookie_control_settings_text_field_0_render(  ) {
 function cookie_control_settings_text_field_2_render(  ) {
 
   $options = get_option( 'cookie_control_settings_settings' );
+  
+  if( isset( $options['cookie_control_settings_text_field_2']) ) {
+      $cookie_control_title = $options['cookie_control_settings_text_field_2'];
+    } else {
+      $cookie_control_title = 'Cookie Control';
+  }
   ?>
-  <input type='text' class="regular-text" name='cookie_control_settings_settings[cookie_control_settings_text_field_2]' value='<?php echo $options['cookie_control_settings_text_field_2']; ?>'>
+
+  <input type='text' class="regular-text" name='cookie_control_settings_settings[cookie_control_settings_text_field_2]' value='<?= $cookie_control_title; ?>'>
   <?php
 
+}
+
+function cookie_control_settings_text_field_5_render(  ) {
+
+  $options = get_option( 'cookie_control_settings_settings' );
+  
+  if( isset( $options['cookie_control_settings_text_field_5']) ) {
+      $cookie_control_page = $options['cookie_control_settings_text_field_5'];
+    } else {
+      $cookie_control_page = 0;
+  }
+
+  	wp_dropdown_pages(
+      array(
+        'name'              => 'cookie_control_settings_settings[cookie_control_settings_text_field_5]',
+        'show_option_none'  => __( '&mdash; Select &mdash;' ),
+        'option_none_value' => '0',
+        'selected'          => $cookie_control_page,
+        'post_status'       => array( 'draft', 'publish' ),
+      )
+    );
+  ?> 
+  <?php
 }
 
 function cookie_control_settings_text_field_3_render(  ) {
@@ -147,7 +153,7 @@ function cookie_control_settings_text_field_4_render(  ) {
 
   $options = get_option( 'cookie_control_settings_settings' );
 
-    if( $options['cookie_control_settings_text_field_4'] ) {
+    if( isset($options['cookie_control_settings_text_field_4']) ) {
       $cookie_control_text = $options['cookie_control_settings_text_field_4'];
     } else {
       $cookie_control_text = 'We use some essential cookies to make this website work.'.PHP_EOL.PHP_EOL.'We’d like to set additional cookies to understand how you use the website, remember your settings and improve you services.'.PHP_EOL.PHP_EOL.'We also use cookies set by other sites to help us deliver content from their services.';
@@ -207,68 +213,6 @@ function cookie_control($cookieType) {
 
 }
 
-
-//Front-end html
-
-function cookie_control_notice( ) {
-
-  if(!isset( $_COOKIE['cookieControlTracking']) || !isset($_COOKIE['cookieControlEssential'] )):
-
-    //Retrieve the values
-    $options = get_option( 'cookie_control_settings_settings' );
-    
-    
-    //Set desktop title
-    if( $options['cookie_control_settings_text_field_2'] ) {
-      $cookie_control_title = $options['cookie_control_settings_text_field_2'];
-    } else {
-      $cookie_control_title = 'Cookie controls';
-    }
-    //Set desktop text
-    $cookie_control_text = $options['cookie_control_settings_text_field_4'];
-    
-    $cookie_control_text = str_replace("\n\r", "</p>\n<p>", $cookie_control_text);
-    $cookie_control_text = "<p>" . $cookie_control_text . "</p>";
-    
-    //Visual style
-    $cookie_control_style = $options['cookie_control_settings_text_field_3'];
-
-    //Reject button
-    $cookie_control_reject_button = ($options['cookie_control_settings_text_field_6'] === 'show');
-
-    //Set read more link
-    $cookie_control_link = '/cookies';
-   
-
-    
-    //Construct the HTML
-    $output = '<div class="cookie-control-notice cookie-control-notice--'.$cookie_control_style .'">';
-      $output .= '<div class="cookie-control-notice__container">';
-
-        $output .= '<h2 class="cookie-control-notice__title">'.$cookie_control_title.'</h2>';
-    
-        $output .= '<div class="cookie-control-notice__text">'.$cookie_control_text.'</div>';
-        
-        $output .= '<p><button class="cookie-control-notice__button cookie-control-notice__button--accept js-cookie-control-accept">Accept additional cookies</button>';
-        
-        if($cookie_control_reject_button):
-          $output .= ' <button class="cookie-control-notice__button cookie-control-notice__button--reject js-cookie-control-accept">Reject additional cookies</button></p>';
-        endif;
-
-        $output .= '<p><a href="'.get_home_url().$cookie_control_link.'" class="cookie-control-notice__link">View cookie controls and policy</a></p>';
-
-      $output .= '</div>';
-    $output .= '</div>';
-
-    //Output the html
-    echo $output;
-
-  endif;
-
-}
-
-
-
 //Short codes
 
 
@@ -318,14 +262,14 @@ add_shortcode('essential_cookies', 'essential_cookies');
 
 
 function save_preferences_button($class = null) {
-  $output = '<button class="cookie-control-save-button '.implode($class).'">Save preferences</button>';
+  $output = '<p><button class="cookie-control-save-button '.implode($class).'">Save preferences</button></p>';
   return $output;
 }
 
 add_shortcode('save_preferences_button', 'save_preferences_button');
 
 function clear_cookies_button($class = null) {
-  $output = '<button class="cookie-control-clear-all-button '.implode($class).'">Clear all cookies</button>';
+  $output = '<p><button class="cookie-control-clear-all-button '.implode($class).'">Clear all cookies</button></p>';
   return $output;
 }
 
