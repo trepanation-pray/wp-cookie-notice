@@ -2,8 +2,6 @@
 
 ## Cookie control page shortcodes
 
-You are required to have root page with the slug `cookies`
-
 Output the tracking cookies options.
 
 `[tracking_cookies]`
@@ -22,18 +20,15 @@ Output clear all cookies button.
 
 ## Template functions
 
-Output the cookie notice in the template. Place just after "skip to content".
-
-`cookie_control_notice()`
-
 Function to check if cookies are set for either "tracking" or "essential" returns a boolean response accordingly.
 
 `cookie_control("tracking")`
 
 Example usage 
 
-**PHP**
 ```
+// PHP
+
 if(cookie_control("tracking")):
   // Code here only displays if user has accepted tracking cookies.
 endif;
@@ -46,9 +41,32 @@ endif;
 `npm install @trepanation-pray/cookie`
 
 ```
+// javascript
+
 import { getCookie, setCookie } from '@trepanation-pray/cookie';
 
-if ( getCookie("tracking")) {
+if ( getCookie("cookieControlTracking")) {
   // Code here only displays if user has accepted tracking cookies.
+}
+```
+
+*Google analytics example*
+
+```
+// javascript
+
+if (getCookie('cookieControlTracking')) {
+  var AnalyticsScript = document.createElement('script');
+  var AnalyticsId = 'G-6ZYYQVXGWJ';
+  AnalyticsScript.onload = () => {
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', AnalyticsId);
+  };
+
+  AnalyticsScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + AnalyticsId;
+
+  document.head.appendChild(AnalyticsScript);
 }
 ```
