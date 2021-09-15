@@ -9,6 +9,38 @@ function setCookieSettings(cookie, value) {
   document.cookie = cookie + "=" + value + "; expires=Thu, 1 Jan 2099 12:00:00 GMT; path=/";
 }
 
+function getCookie(name) {
+  var value = "; " + document.cookie;
+
+  var parts = value.split("; " + name + "=");
+
+  if (parts.length == 2)
+    return parts
+      .pop()
+      .split(";")
+      .shift();
+}
+
+var stringToHTML = function (str) {
+  var parser = new DOMParser();
+  var doc = parser.parseFromString(str, 'text/html');
+  return doc.body;
+};
+
+window.addEventListener('load', () => {
+  fetch('/app/plugins/wp-cookie-notice/cookie-control-notice.php')
+    .then(response => response.text())
+    .then(body => {
+      if (!getCookie('cookieControlTracking') || !getCookie('cookieControlEssential')) {
+        var html = stringToHTML(body).querySelector('.cookie-control-notice')
+        setTimeout(() => {
+          html.classList.add('active');
+        }, 100);
+        document.body.prepend(html)
+      }
+    });
+});
+
 function closeCookieNotice() {
   // cookieNoticeElement.classList.remove("active");
 
