@@ -2,7 +2,7 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 2.1.1
+  Version: 2.1.2
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2

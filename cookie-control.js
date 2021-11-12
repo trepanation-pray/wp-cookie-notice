@@ -1,10 +1,3 @@
-
-var cookieNoticeElement = document.querySelector(".cookie-control-notice");
-
-if (cookieNoticeElement) {
-  cookieNoticeElement.classList.add("active");
-}
-
 function setCookieSettings(cookie, value) {
   document.cookie = cookie + "=" + value + "; expires=Thu, 1 Jan 2099 12:00:00 GMT; path=/";
 }
@@ -41,25 +34,35 @@ window.addEventListener('load', () => {
     });
 });
 
+
+
 function closeCookieNotice() {
-  // cookieNoticeElement.classList.remove("active");
 
   setTimeout(function () {
-    cookieNoticeElement.parentNode.parentNode.removeChild(cookieNoticeElement);
-  }, 500);
+    document.body.querySelector(".cookie-control-notice").classList.remove("active");
+  }, 1000);
+  setTimeout(function () {
+    document.body.querySelector(".cookie-control-notice").remove();
+  }, 1500);
+
 }
+
+var cookieAccept = document.createEvent("Event");
+cookieAccept.initEvent("cookieAccept", true, true);
+
+var cookieReject = document.createEvent("Event");
+cookieReject.initEvent("cookieReject", true, true);
+
 
 document.body.addEventListener("click", function (event) {
 
   if (!event.target.matches(".cookie-control-notice__button--accept")) return;
   event.preventDefault();
-  console.log('pressed')
   event.target.classList.add('loading');
   setCookieSettings("cookieControlTracking", "accept");
   setCookieSettings("cookieControlEssential", "accept");
   closeCookieNotice();
-  window.location.reload()
-
+  document.dispatchEvent(cookieAccept);
 }, false);
 
 document.body.addEventListener("click", function (event) {
@@ -70,7 +73,7 @@ document.body.addEventListener("click", function (event) {
   setCookieSettings("cookieControlTracking", "reject");
   setCookieSettings("cookieControlEssential", "reject");
   closeCookieNotice();
-  window.location.reload();
+  document.dispatchEvent(cookieReject);
 
 }, false);
 
