@@ -55,9 +55,11 @@ if ( getCookie("cookieControlTracking")) {
 ```
 // javascript
 
-if (getCookie('cookieControlTracking')) {
+// Google analytics
+
+function googleAnalytics() {
   var AnalyticsScript = document.createElement('script');
-  var AnalyticsId = 'G-6ZYYQVXGWJ';
+  var AnalyticsId = 'XX-XXXXXXX';
   AnalyticsScript.onload = () => {
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
@@ -69,4 +71,19 @@ if (getCookie('cookieControlTracking')) {
 
   document.head.appendChild(AnalyticsScript);
 }
+
+if (getCookie('cookieControlTracking')) {
+  googleAnalytics();
+}
+
+document.addEventListener('cookieAccept', function (event) {
+  googleAnalytics();
+  console.log('accept cookies')
+}, false);
+
+document.addEventListener('cookieReject', function (event) {
+  console.log('reject cookies')
+}, false);
+
+
 ```
