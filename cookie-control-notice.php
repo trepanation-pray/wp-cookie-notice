@@ -1,6 +1,6 @@
 <?php
-  require_once( $_SERVER['DOCUMENT_ROOT'] .'/wp/wp-blog-header.php' );
-
+function cookie_notice_content() {
+  
   //Retrieve the values
   $options = get_option( 'cookie_control_settings_settings' );
   
@@ -49,3 +49,12 @@
 
   //Output the html
   echo $output;
+
+}
+
+add_action( 'rest_api_init', function() {
+  register_rest_route( 'cookie-control', '/notice-content', array(          
+    'methods'  => 'GET',
+    'callback' => 'cookie_notice_content' 
+  ) ); 
+} );

@@ -21,7 +21,7 @@ var stringToHTML = function (str) {
 };
 
 window.addEventListener('load', () => {
-  fetch('/app/plugins/wp-cookie-notice/cookie-control-notice.php')
+  fetch('/wp-json/cookie-control/notice-content')
     .then(response => response.text())
     .then(body => {
       if (!getCookie('cookieControlTracking') || !getCookie('cookieControlEssential')) {
@@ -100,7 +100,7 @@ document.body.addEventListener("click", function (event) {
   if (!event.target.matches(".cookie-control-clear-all-button")) return;
   event.preventDefault();
   event.target.classList.add('loading');
-  fetch('/app/plugins/wp-cookie-notice/clear-cookies.php')
+  fetch('/wp-json/cookie-control/clear-cookies')
     .then(window.location.assign(window.location.pathname.slice(0, -1)));
 
 }, false);

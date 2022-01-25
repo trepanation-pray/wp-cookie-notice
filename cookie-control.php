@@ -2,7 +2,7 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 2.1.4
+  Version: 2.1.5
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
@@ -274,3 +274,8 @@ function clear_cookies_button($class = null) {
 }
 
 add_shortcode('clear_cookies_button', 'clear_cookies_button');
+
+// API endpoints
+
+require_once('cookie-control-notice.php');
+require_once('clear-cookies.php');
