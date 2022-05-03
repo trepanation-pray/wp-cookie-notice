@@ -15,6 +15,7 @@
   add_action( 'rest_api_init', function() {
   register_rest_route( 'cookie-control', '/clear-cookies', array(          
     'methods'  => 'GET',
-    'callback' => 'clear_cookies' 
+    'callback' => 'clear_cookies',
+    'permission_callback' => '__return_true'
   ) ); 
   } );

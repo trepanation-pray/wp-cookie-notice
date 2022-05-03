@@ -55,6 +55,7 @@ function cookie_notice_content() {
 add_action( 'rest_api_init', function() {
   register_rest_route( 'cookie-control', '/notice-content', array(          
     'methods'  => 'GET',
-    'callback' => 'cookie_notice_content' 
+    'callback' => 'cookie_notice_content',
+    'permission_callback' => '__return_true'
   ) ); 
 } );
