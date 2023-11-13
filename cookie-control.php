@@ -102,15 +102,6 @@ function cookie_control_settings_settings_init(  ) {
   
 }
 
-
-function cookie_control_settings_text_field_0_render(  ) {
-
-  $options = get_option( 'cookie_control_settings_settings' );
-  ?>
-  <input type='text' class="regular-text" name='cookie_control_settings_settings[cookie_control_settings_text_field_0]' value='<?php echo $options['cookie_control_settings_text_field_0']; ?>'>
-  <?php
-
-}
 function cookie_control_title_render(  ) {
 
   $options = get_option( 'cookie_control_settings_settings' );
@@ -209,8 +200,8 @@ function cookie_control_content_render(  ) {
     } else {
       $cookie_control_text = file_get_contents( __DIR__ . '/cookies-page-content.html');
     }
-    
     wp_editor($cookie_control_text, 'cookie_control_content', $settings);
+    echo '<p>To use the content above in page use this shortcode: <strong>[cookie_notice_page_content]</strong></p>';
 
 }
 
@@ -336,10 +327,19 @@ function clear_cookies_button($class = null) {
 
 add_shortcode('clear_cookies_button', 'clear_cookies_button');
 
+function cookie_notice_page_content() {
+
+  $options = get_option( 'cookie_control_settings_settings' );
+  return wpautop(apply_filters('the_content', $options['cookie_control_content']));;
+
+}
+
+add_shortcode('cookie_notice_page_content', 'cookie_notice_page_content');
+
+
 // API endpoints
 
 require_once('cookie-control-notice.php');
 require_once('clear-cookies.php');
-
 
 
