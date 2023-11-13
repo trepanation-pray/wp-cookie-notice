@@ -8,10 +8,34 @@
   License: GPL2
 */
 
-//Settings Page
+
+function replace_page_content($content) {
+  // Check if it's the page with the specified ID (e.g., 123).
+  $options = get_option( 'cookie_control_settings_settings');
+
+  if ( is_page($options['cookie_control_page']) ) {
+      $cookie_control_text = $options['cookie_control_content'];
+      $content = '<div class="cookie-control-notice__content">' . wp_kses_post($cookie_control_text) . '</div>';
+  }
+  return $content;
+}
+
+add_filter('the_content', 'replace_page_content', 10);
+
+
+
+function add_content_filter() {
+  add_filter('the_content', 'replace_page_content');
+}
+
+
+add_action('init', 'add_content_filter');
+
 
 add_action( 'admin_menu', 'cookie_control_settings_add_admin_menu' );
 add_action( 'admin_init', 'cookie_control_settings_settings_init' );
+
+
 
 
 function cookie_control_settings_add_admin_menu(  ) {
@@ -33,38 +57,45 @@ function cookie_control_settings_settings_init(  ) {
   );
 
   add_settings_field(
-    'cookie_control_settings_text_field_2',
+    'cookie_control_title',
     __( 'Title', 'Cookie Control Settings' ),
-    'cookie_control_settings_text_field_2_render',
+    'cookie_control_title_render',
     'pluginPage',
     'cookie_control_settings_pluginPage_section'
   );
 
   add_settings_field(
-    'cookie_control_settings_text_field_4',
+    'cookie_control_description',
     __( 'Description text', 'Cookie Control Settings' ),
-    'cookie_control_settings_text_field_4_render',
+    'cookie_control_description_render',
     'pluginPage',
     'cookie_control_settings_pluginPage_section'
   );
   add_settings_field(
-    'cookie_control_settings_text_field_5',
+    'cookie_control_page',
     __( 'Select preferences page', 'Cookie Control Settings' ),
-    'cookie_control_settings_text_field_5_render',
+    'cookie_control_page_render',
     'pluginPage',
     'cookie_control_settings_pluginPage_section'
   );
   add_settings_field(
-    'cookie_control_settings_text_field_6',
+    'cookie_control_reject_button',
     __( 'Show/Hide reject button', 'Cookie Control Settings' ),
-    'cookie_control_settings_text_field_6_render',
+    'cookie_control_reject_button_render',
     'pluginPage',
     'cookie_control_settings_pluginPage_section'
   );
   add_settings_field(
-    'cookie_control_settings_text_field_3',
+    'cookie_control_style',
     __( 'Visual style', 'Cookie Control Settings' ),
-    'cookie_control_settings_text_field_3_render',
+    'cookie_control_style_render',
+    'pluginPage',
+    'cookie_control_settings_pluginPage_section'
+  );
+  add_settings_field(
+    'cookie_control_content',
+    __( 'Manage cookie content', 'Cookie Control Settings' ),
+    'cookie_control_content_render',
     'pluginPage',
     'cookie_control_settings_pluginPage_section'
   );
@@ -80,35 +111,35 @@ function cookie_control_settings_text_field_0_render(  ) {
   <?php
 
 }
-function cookie_control_settings_text_field_2_render(  ) {
+function cookie_control_title_render(  ) {
 
   $options = get_option( 'cookie_control_settings_settings' );
   
-  if( isset( $options['cookie_control_settings_text_field_2']) ) {
-      $cookie_control_title = $options['cookie_control_settings_text_field_2'];
+  if( isset( $options['cookie_control_title']) ) {
+      $cookie_control_title = $options['cookie_control_title'];
     } else {
       $cookie_control_title = 'Cookie Control';
   }
   ?>
 
-  <input type='text' class="regular-text" name='cookie_control_settings_settings[cookie_control_settings_text_field_2]' value='<?= $cookie_control_title; ?>'>
+  <input type='text' class="regular-text" name='cookie_control_settings_settings[cookie_control_title]' value='<?= $cookie_control_title; ?>'>
   <?php
 
 }
 
-function cookie_control_settings_text_field_5_render(  ) {
+function cookie_control_page_render(  ) {
 
   $options = get_option( 'cookie_control_settings_settings' );
   
-  if( isset( $options['cookie_control_settings_text_field_5']) ) {
-      $cookie_control_page = $options['cookie_control_settings_text_field_5'];
+  if( isset( $options['cookie_control_page']) ) {
+      $cookie_control_page = $options['cookie_control_page'];
     } else {
       $cookie_control_page = 0;
   }
 
   	wp_dropdown_pages(
       array(
-        'name'              => 'cookie_control_settings_settings[cookie_control_settings_text_field_5]',
+        'name'              => 'cookie_control_settings_settings[cookie_control_page]',
         'show_option_none'  => __( '&mdash; Select &mdash;' ),
         'option_none_value' => '0',
         'selected'          => $cookie_control_page,
@@ -119,54 +150,73 @@ function cookie_control_settings_text_field_5_render(  ) {
   <?php
 }
 
-function cookie_control_settings_text_field_3_render(  ) {
+function cookie_control_style_render(  ) {
 
   $options = get_option( 'cookie_control_settings_settings' );
   ?>
-  <select name="cookie_control_settings_settings[cookie_control_settings_text_field_3]" id="cookie_control_settings_text_field_3">
-    <?php $selected = (isset( $options['cookie_control_settings_text_field_3'] ) && $options['cookie_control_settings_text_field_3'] === 'overlay') ? 'selected' : '' ; ?>
+  <select name="cookie_control_settings_settings[cookie_control_style]" id="cookie_control_style">
+    <?php $selected = (isset( $options['cookie_control_style'] ) && $options['cookie_control_style'] === 'overlay') ? 'selected' : '' ; ?>
     <option value="overlay" <?php echo $selected; ?>>Overlay</option>
-    <?php $selected = (isset( $options['cookie_control_settings_text_field_3'] ) && $options['cookie_control_settings_text_field_3'] === 'inline') ? 'selected' : '' ; ?>
+    <?php $selected = (isset( $options['cookie_control_style'] ) && $options['cookie_control_style'] === 'inline') ? 'selected' : '' ; ?>
     <option value="inline" <?php echo $selected; ?>>Inline</option>
-    <?php $selected = (isset( $options['cookie_control_settings_text_field_3'] ) && $options['cookie_control_settings_text_field_3'] === 'corner') ? 'selected' : '' ; ?>
+    <?php $selected = (isset( $options['cookie_control_style'] ) && $options['cookie_control_style'] === 'corner') ? 'selected' : '' ; ?>
     <option value="corner" <?php echo $selected; ?>>Corner</option>
-     <?php $selected = (isset( $options['cookie_control_settings_text_field_3'] ) && $options['cookie_control_settings_text_field_3'] === 'none') ? 'selected' : '' ; ?>
+     <?php $selected = (isset( $options['cookie_control_style'] ) && $options['cookie_control_style'] === 'none') ? 'selected' : '' ; ?>
     <option value="none" <?php echo $selected; ?>>None</option>
   </select><?php
 
 }
 
-function cookie_control_settings_text_field_6_render(  ) {
+function cookie_control_reject_button_render(  ) {
 
   $options = get_option( 'cookie_control_settings_settings' );
   ?>
-  <select name="cookie_control_settings_settings[cookie_control_settings_text_field_6]" id="cookie_control_settings_text_field_6">
-    <?php $selected = (isset( $options['cookie_control_settings_text_field_6'] ) && $options['cookie_control_settings_text_field_6'] === 'show') ? 'selected' : '' ; ?>
+  <select name="cookie_control_settings_settings[cookie_control_reject_button]" id="cookie_control_reject_button">
+    <?php $selected = (isset( $options['cookie_control_reject_button'] ) && $options['cookie_control_reject_button'] === 'show') ? 'selected' : '' ; ?>
     <option value="show" <?php echo $selected; ?>>Show</option>
-    <?php $selected = (isset( $options['cookie_control_settings_text_field_6'] ) && $options['cookie_control_settings_text_field_6'] === 'hide') ? 'selected' : '' ; ?>
+    <?php $selected = (isset( $options['cookie_control_reject_button'] ) && $options['cookie_control_reject_button'] === 'hide') ? 'selected' : '' ; ?>
     <option value="hide" <?php echo $selected; ?>>Hide</option>
   </select><?php
 
 }
 
-function cookie_control_settings_text_field_4_render(  ) {
+function cookie_control_description_render(  ) {
 
   $options = get_option( 'cookie_control_settings_settings' );
 
-    if( isset($options['cookie_control_settings_text_field_4']) ) {
-      $cookie_control_text = $options['cookie_control_settings_text_field_4'];
+    if( isset($options['cookie_control_description']) ) {
+      $cookie_control_text = $options['cookie_control_description'];
     } else {
-      $cookie_control_text = 'We use some essential cookies to make this website work.'.PHP_EOL.PHP_EOL.'We’d like to set additional cookies to understand how you use the website, remember your settings and improve you services.'.PHP_EOL.PHP_EOL.'We also use cookies set by other sites to help us deliver content from their services.';
+      $cookie_control_text = 'We use some essential cookies to make this website work.'.PHP_EOL.PHP_EOL.'We’d like to set additional cookies to understand how you use the website, remember your settings and improve your services.'.PHP_EOL.PHP_EOL.'We also use cookies set by other sites to help us deliver content from their services.';
     }
   ?>
-  <textarea class="regular-text" rows="5" name='cookie_control_settings_settings[cookie_control_settings_text_field_4]'><?= $cookie_control_text ?></textarea>
+  <textarea class="regular-text" rows="5" name='cookie_control_settings_settings[cookie_control_description]'><?= $cookie_control_text ?></textarea>
   <?php
+
+}
+function cookie_control_content_render(  ) {
+
+    $options = get_option( 'cookie_control_settings_settings' );
+
+    $settings = $settings = [
+      'textarea_name' => 'cookie_control_settings_settings[cookie_control_content]',
+      'default_editor' => true,
+      'media_buttons' => false,
+    ];
+
+    if( isset($options['cookie_control_content']) ) {
+      $cookie_control_text = $options['cookie_control_content'];
+    } else {
+      $cookie_control_text = file_get_contents( __DIR__ . '/cookies-page-content.html');
+    }
+    
+    wp_editor($cookie_control_text, 'cookie_control_content', $settings);
 
 }
 
 function cookie_control_settings_settings_section_callback(  ) {
 
-  echo __( '<p>The EU law now imposes that a communications provider must get consent from the user when storing or accessing information. This includes the use of cookies.</p><p>If no values are set predefined defaults will be used.</p><p>Code and template references can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice#readme" target="_blank">here</a></p><p>Default Page content with controls can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice/blob/master/cookies-page-content.html" target="_blank">here</a></p>', 'Cookie Control Settings' );
+  echo __( '<p>The EU law now imposes that a communications provider must get consent from the user when storing or accessing information. This includes the use of cookies.</p><p>If no values are set predefined defaults will be used.</p><p>Code and template references can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice#readme" target="_blank">here</a></p>', 'Cookie Control Settings' );
 
 }
 
@@ -229,7 +279,7 @@ function tracking_cookies() {
 
   $output .= '<li class="cookie-control-settings__item"><input type="radio" value="reject" id="tracking-cookies-reject" name="tracking-cookies" class="cookie-control-settings__input"';
 
-  if(isset($_COOKIE['cookieControlTracking']) && $_COOKIE['cookieControlTracking'] == 'reject'):
+  if(isset($_COOKIE['cookieControlTracking']) && $_COOKIE['cookieControlTracking'] == 'reject' || !isset($_COOKIE['cookieControlTracking']) ):
     $output .= ' checked="checked"';
   endif;
 
@@ -244,14 +294,18 @@ add_shortcode('tracking_cookies', 'tracking_cookies');
 function essential_cookies() {
   $output = '<ul class="cookie-control-settings">';
   $output .= '<li class="cookie-control-settings__item"><input type="radio" value="accept" id="essential-cookies-accept" name="essential-cookies" class="cookie-control-settings__input"';
+
   if(isset($_COOKIE['cookieControlEssential']) && $_COOKIE['cookieControlEssential'] == 'accept'):
     $output .= ' checked="checked"';
   endif;
+  
   $output .='><label for="essential-cookies-accept" class="cookie-control-settings__label">Use cookies that remember my settings on the site</label></li>';
   $output .= '<li class="cookie-control-settings__item"><input type="radio" value="reject" id="essential-cookies-reject" name="essential-cookies" class="cookie-control-settings__input"';
-    if(isset($_COOKIE['cookieControlEssential']) && $_COOKIE['cookieControlEssential'] == 'reject'):
+
+  if(isset($_COOKIE['cookieControlEssential']) && $_COOKIE['cookieControlEssential'] == 'reject' || !isset($_COOKIE['cookieControlEssential']) ):
     $output .= ' checked="checked"';
   endif;
+
   $output .='><label for="essential-cookies-reject" class="cookie-control-settings__label">Do not use cookies that remember my settings on the site</label></li>';
   $output .= '</ul>';
   return $output;
@@ -261,15 +315,22 @@ function essential_cookies() {
 add_shortcode('essential_cookies', 'essential_cookies');
 
 
+function accept_additional_button($class = null) {
+  $output = '<button class="cookie-control-notice__button cookie-control-notice__button--accept js-cookie-control-accept">Accept additional cookies</button>';
+  return $output;
+}
+
+add_shortcode('accept_additional_button', 'accept_additional_button');
+
 function save_preferences_button($class = null) {
-  $output = '<p><button class="cookie-control-save-button '.implode($class).'">Save preferences</button></p>';
+  $output .= '<button class="cookie-control-save-button cookie-control-notice__button cookie-control-notice__button--save'.implode($class).'">Save preferences</button>';
   return $output;
 }
 
 add_shortcode('save_preferences_button', 'save_preferences_button');
 
 function clear_cookies_button($class = null) {
-  $output = '<p><button class="cookie-control-clear-all-button '.implode($class).'">Clear all cookies</button></p>';
+  $output = '<button class="cookie-control-clear-all-button cookie-control-notice__button cookie-control-notice__button--clear'.implode($class).'">Clear all cookies</button>';
   return $output;
 }
 
@@ -279,3 +340,6 @@ add_shortcode('clear_cookies_button', 'clear_cookies_button');
 
 require_once('cookie-control-notice.php');
 require_once('clear-cookies.php');
+
+
+

@@ -19,17 +19,64 @@ var stringToHTML = function (str) {
   var doc = parser.parseFromString(str, 'text/html');
   return doc.body;
 };
+// Trap tabbing in overly version
+function tabTrappingCookieNotice() {
+  var overlay = document.body.querySelector('.cookie-control-notice--overlay');
+  if (overlay) {
+    
+    var cookieNoticeTabList = document.querySelectorAll('.cookie-control-notice__landing a, .cookie-control-notice__landing button');
+  
+    cookieNoticeTabList[0].focus();
+    cookieNoticeTabList[0].blur();
+  
+    cookieNoticeTabList[cookieNoticeTabList.length - 1].addEventListener('keydown', (event) => {
+      console.log(1111);
+      if (event.shiftKey && event.keyCode == 9) {
+  
+        event.preventDefault();
+        cookieNoticeTabList[cookieNoticeTabList.length - 2].focus();
+  
+      } else if (event.keyCode == 9) {
+  
+        event.preventDefault();
+        cookieNoticeTabList[0].focus();
+  
+      }
+  
+    }, false);
+  
+    cookieNoticeTabList[0].addEventListener('keydown', (event) => {
+  
+      if (event.shiftKey && event.keyCode == 9) {
+  
+        event.preventDefault();
+        cookieNoticeTabList[cookieNoticeTabList.length - 1].focus();
+  
+      } else if (event.keyCode == 9) {
+  
+        event.preventDefault();
+        cookieNoticeTabList[1].focus();
+  
+      }
+  
+    }, false);
+  
+  }
+}
 
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
   fetch('/wp-json/cookie-control/notice-content')
     .then(response => response.text())
     .then(body => {
       if (!getCookie('cookieControlTracking') || !getCookie('cookieControlEssential')) {
         var html = stringToHTML(body).querySelector('.cookie-control-notice')
+        document.body.prepend(html);
         setTimeout(() => {
           html.classList.add('active');
+          var content = document.body.querySelector('.cookie-control-notice__container');
+          content.focus();
+          tabTrappingCookieNotice();
         }, 100);
-        document.body.prepend(html)
       }
     });
 });
@@ -63,6 +110,19 @@ document.body.addEventListener("click", function (event) {
   setCookieSettings("cookieControlEssential", "accept");
   closeCookieNotice();
   document.dispatchEvent(cookieAccept);
+}, false);
+
+document.body.addEventListener("click", function (event) {
+
+  if (!event.target.matches(".cookie-control-notice__button--manage")) return;
+  event.preventDefault();
+  
+  var cookieControlLanding = document.querySelector(".cookie-control-notice__landing");
+  var cookieControlManage = document.querySelector(".cookie-control-notice__manage");
+
+  cookieControlLanding.style.display = 'none';
+  cookieControlManage.style.display = 'block';
+
 }, false);
 
 document.body.addEventListener("click", function (event) {
@@ -106,45 +166,6 @@ document.body.addEventListener("click", function (event) {
 }, false);
 
 
-// Trap tabbing in overly version
 
-if (document.querySelector('.cookie-control-notice--overlay')) {
 
-  var cookieNoticeTabList = document.querySelectorAll('.cookie-control-notice a, .cookie-control-notice button');
 
-  cookieNoticeTabList[0].focus();
-  cookieNoticeTabList[0].blur();
-
-  cookieNoticeTabList[cookieNoticeTabList.length - 1].addEventListener('keydown', (event) => {
-
-    if (event.shiftKey && event.keyCode == 9) {
-
-      event.preventDefault();
-      cookieNoticeTabList[cookieNoticeTabList.length - 2].focus();
-
-    } else if (event.keyCode == 9) {
-
-      event.preventDefault();
-      cookieNoticeTabList[0].focus();
-
-    }
-
-  }, false);
-
-  cookieNoticeTabList[0].addEventListener('keydown', (event) => {
-
-    if (event.shiftKey && event.keyCode == 9) {
-
-      event.preventDefault();
-      cookieNoticeTabList[cookieNoticeTabList.length - 1].focus();
-
-    } else if (event.keyCode == 9) {
-
-      event.preventDefault();
-      cookieNoticeTabList[1].focus();
-
-    }
-
-  }, false);
-
-}

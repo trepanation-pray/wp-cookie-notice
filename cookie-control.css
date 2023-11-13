@@ -6,8 +6,21 @@
   font-family: sans-serif;
   line-height: 1.5;
   padding: 10px 45px 10px 10px;
+  max-height: calc(100% - 4rem);
+  overflow: auto;
 
 }
+
+.cookie-control-notice__container p:has(a[href*=privacy-policy]) {
+  display: none;
+}
+.cookie-control-notice__landing {
+  
+}
+.cookie-control-notice__manage {
+  display: none;
+}
+
 .cookie-control-notice--overlay {
   top: 0;
   left: 0;
@@ -26,8 +39,15 @@
   width: 100%;
   color: #3C3C3C;
   background: white;
-  max-width: 700px;
+  max-width: 1000px;
   border-radius: 5px;
+}
+.cookie-control-notice--inline {
+  top: 0;
+  left: 0;
+  width: 100%;
+  position: fixed;
+  z-index: 999999;
 }
 .cookie-control-notice--inline .cookie-control-notice__container {
   color: white;
@@ -72,21 +92,42 @@
   font-weight: bold;
   text-decoration: none;
   margin: 1rem 1rem 0 0;
-  padding: 7px 10px;
+  padding: 7px 10px !important;
   border-radius: 4px;
-  border: 2px solid #11ccab;
+  border: 3px solid #11ccab;
   transition: .3s;
 }
 .cookie-control-notice__button--accept {
+  display: none;
   background: #11ccab;
   color: white;
 }
-.cookie-control-notice__button--reject {
-  background: none;
-  color: #11ccab;
+
+.cookie-control-notice__container:has(.cookie-control-notice__button--accept) .cookie-control-notice__button--accept {
+  display: inline-block;
 }
+
+.cookie-control-notice__button--manage {
+  border-color: #1c1c1c;
+  background: #1c1c1c;
+  color: white;
+}
+.cookie-control-notice__button--reject {
+  display: none;
+  border-color: #1c1c1c;
+  background: #1c1c1c;
+  color: white;
+}
+.cookie-control-notice__container:has(.cookie-control-notice__button--reject) .cookie-control-notice__button--reject {
+  display: inline-block;
+}
+
 .cookie-control-notice__button:hover {
   text-decoration: none;
+  transform: translatey(-0.1em);
+  box-shadow: 0 0.1em 0.1em rgb(23 36 61 / 25%),
+    0 0.2em 0.5em rgb(23 36 61 / 25%);
+  outline: none;
 }
 .cookie-control-notice__button:focus-visible{
   text-decoration: none;
@@ -113,8 +154,8 @@
   color: white;
 }
 .cookie-control-notice__link:focus-visible {
-  background: #ffc107;
-  color: #1c1c1c;
+  background: #ffc107 !important;
+  color: #1c1c1c !important;
   text-decoration: underline !important;
 }
 @media (min-width: 680px) {
@@ -152,7 +193,9 @@
 }
 
 .cookie-control-clear-all-button {
-  
+}
+.cookie-control-notice__container:has(.cookie-control-clear-all-button) .cookie-control-clear-all-button {
+  display: none !important;
 }
 .cookie-control-notice__button.loading,
 .cookie-control-save-button.loading,
