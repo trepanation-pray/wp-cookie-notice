@@ -321,7 +321,7 @@ function save_preferences_button($class = null) {
 add_shortcode('save_preferences_button', 'save_preferences_button');
 
 function clear_cookies_button($class = null) {
-  $output = '<button class="cookie-control-clear-all-button cookie-control-notice__button cookie-control-notice__button--clear'.implode($class).'">Clear all cookies</button>';
+  $output = '<button class="cookie-control-clear-all-button cookie-control-notice__button cookie-control-notice__button--clear '.implode($class).'">Clear all cookies</button>';
   return $output;
 }
 
