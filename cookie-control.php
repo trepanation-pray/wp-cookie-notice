@@ -2,7 +2,7 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 2.1.6
+  Version: 2.2.2
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
@@ -15,7 +15,7 @@ function replace_page_content($content) {
 
   if ( is_page($options['cookie_control_page']) ) {
       $cookie_control_text = $options['cookie_control_content'];
-      $content = '<div class="cookie-control-notice__content">' . wp_kses_post($cookie_control_text) . '</div>';
+      $content = '<div class="cookie-control-notice__content">' . wpautop($cookie_control_text) . '</div>';
   }
   return $content;
 }
@@ -201,7 +201,7 @@ function cookie_control_content_render(  ) {
       $cookie_control_text = file_get_contents( __DIR__ . '/cookies-page-content.html');
     }
     wp_editor($cookie_control_text, 'cookie_control_content', $settings);
-    echo '<p>To use the content above in page use this shortcode: <strong>[cookie_notice_page_content]</strong></p>';
+    echo '<p>To use the content above in page where are not using the default editor use this shortcode: <strong>[cookie_notice_page_content]</strong></p>';
 
 }
 
@@ -314,7 +314,7 @@ function accept_additional_button($class = null) {
 add_shortcode('accept_additional_button', 'accept_additional_button');
 
 function save_preferences_button($class = null) {
-  $output .= '<button class="cookie-control-save-button cookie-control-notice__button cookie-control-notice__button--save'.implode($class).'">Save preferences</button>';
+  $output .= '<button class="cookie-control-save-button cookie-control-notice__button cookie-control-notice__button--save '.implode($class).'">Save preferences</button>';
   return $output;
 }
 
@@ -330,7 +330,7 @@ add_shortcode('clear_cookies_button', 'clear_cookies_button');
 function cookie_notice_page_content() {
 
   $options = get_option( 'cookie_control_settings_settings' );
-  return wpautop(apply_filters('the_content', $options['cookie_control_content']));;
+  return wpautop(apply_filters('the_content', $options['cookie_control_content']));
 
 }
 
