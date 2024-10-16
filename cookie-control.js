@@ -109,7 +109,6 @@ function closeCookieNotice() {
 document.body.addEventListener("click", function (event) {
   if (!event.target.matches(".cookie-control-notice__button--accept")) return;
   event.preventDefault();
-  console.log("Consent button clicked"); // Added debug log
   
     // Set cookie values
     setCookieSettings("cookieControlTracking", "accept");
