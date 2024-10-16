@@ -72,7 +72,7 @@ function updateConsentStatus(adStorage, analyticsStorage, marketingStorage) {
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize consent state if not already set
-  if (typeof window.wpConsentApi !== 'undefined') {
+  if (typeof window.wpConsentApi !== 'undefined' && window.wpConsentApi.consents) {
     if (!window.wpConsentApi.consents.get('analytics')) {
       window.wpConsentApi.consents.set('analytics', false);
       window.wpConsentApi.consents.set('functional', false);
@@ -111,9 +111,11 @@ document.body.addEventListener("click", function (event) {
   event.preventDefault();
 
   // Accept cookies
-  window.wpConsentApi.consents.set('analytics', true);
-  window.wpConsentApi.consents.set('functional', true);
-  window.wpConsentApi.consents.set('marketing', true);
+  if (typeof window.wpConsentApi !== 'undefined' && window.wpConsentApi.consents) {
+    window.wpConsentApi.consents.set('analytics', true);
+    window.wpConsentApi.consents.set('functional', true);
+    window.wpConsentApi.consents.set('marketing', true);
+  }
 
   // Update Google Consent Mode
   updateConsentStatus('granted', 'granted', 'granted');
@@ -137,9 +139,11 @@ document.body.addEventListener("click", function (event) {
   event.preventDefault();
 
   // Reject cookies
-  window.wpConsentApi.consents.set('analytics', false);
-  window.wpConsentApi.consents.set('functional', false);
-  window.wpConsentApi.consents.set('marketing', false);
+  if (typeof window.wpConsentApi !== 'undefined' && window.wpConsentApi.consents) {
+    window.wpConsentApi.consents.set('analytics', false);
+    window.wpConsentApi.consents.set('functional', false);
+    window.wpConsentApi.consents.set('marketing', false);
+  }
 
   // Update Google Consent Mode
   updateConsentStatus('denied', 'denied', 'denied');
