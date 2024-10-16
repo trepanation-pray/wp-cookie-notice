@@ -2,7 +2,7 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 2.2.3
+  Version: 3.0.0
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
@@ -15,12 +15,15 @@ function insert_consent_mode_script() {
     function gtag(){dataLayer.push(arguments);}
     gtag('consent', 'default', {
       'ad_storage': 'denied',
-      'analytics_storage': 'denied'
+      'analytics_storage': 'denied',
+      'marketing_storage': 'denied'
     });
   </script>
   <?php
 }
 add_action('wp_head', 'insert_consent_mode_script', 1);
+
+
 
 function replace_page_content($content) {
   // Check if it's the page with the specified ID (e.g., 123).
@@ -256,6 +259,12 @@ function cookie_control($cookieType) {
       endif;
       return false;
       break;
+    case 'marketing':
+      if( isset( $_COOKIE['cookieControlMarketing']) && $_COOKIE['cookieControlMarketing'] == 'accept' ):
+        return true;
+      endif;
+      return false;
+      break;
     case 'essential':
       if( isset( $_COOKIE['cookieControlEssential']) && $_COOKIE['cookieControlEssential'] == 'accept' ):
         return true;
@@ -294,6 +303,31 @@ function tracking_cookies() {
 }
 
 add_shortcode('tracking_cookies', 'tracking_cookies');
+
+function marketing_cookies() {
+  $output = '<ul class="cookie-control-settings">';
+
+  $output .= '<li class="cookie-control-settings__item"><input type="radio" value="accept" id="marketing-cookies-accept" name="marketing-cookies" class="cookie-control-settings__input"';
+  
+  if(isset($_COOKIE['cookieControlMarketing']) && $_COOKIE['cookieControlMarketing'] == 'accept'):
+    $output .= ' checked="checked"';
+  endif;
+
+  $output .= '><label for="marketing-cookies-accept" class="cookie-control-settings__label">Use cookies that help with communications and marketing</label></li>';
+
+  $output .= '<li class="cookie-control-settings__item"><input type="radio" value="reject" id="marketing-cookies-reject" name="marketing-cookies" class="cookie-control-settings__input"';
+
+  if(isset($_COOKIE['cookieControlMarketing']) && $_COOKIE['cookieControlMarketing'] == 'reject' || !isset($_COOKIE['cookieControlMarketing']) ):
+    $output .= ' checked="checked"';
+  endif;
+
+  $output .='><label for="marketing-cookies-reject" class="cookie-control-settings__label">Do not use cookies that help with communications and marketing</label></li>';
+  $output .= '</ul>';
+  return $output;
+
+}
+
+add_shortcode('marketing_cookies', 'marketing_cookies');
 
 function essential_cookies() {
   $output = '<ul class="cookie-control-settings">';
