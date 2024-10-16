@@ -63,7 +63,23 @@ function tabTrappingCookieNotice() {
   
   }
 }
-
+function updateConsentStatus(adStorage, analyticsStorage) {
+  if (typeof gtag === 'function') {
+    gtag('consent', 'update', {
+      'ad_storage': adStorage,
+      'analytics_storage': analyticsStorage
+    });
+  } else {
+    // If gtag is not yet available, wait for it
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(function() {
+      gtag('consent', 'update', {
+        'ad_storage': adStorage,
+        'analytics_storage': analyticsStorage
+      });
+    });
+  }
+}
 document.addEventListener('DOMContentLoaded', () => {
   fetch('/wp-json/cookie-control/notice-content')
     .then(response => response.text())
@@ -108,6 +124,13 @@ document.body.addEventListener("click", function (event) {
   event.target.classList.add('loading');
   setCookieSettings("cookieControlTracking", "accept");
   setCookieSettings("cookieControlEssential", "accept");
+
+  // Update Google Consent Mode
+  gtag('consent', 'update', {
+    'ad_storage': 'granted',
+    'analytics_storage': 'granted'
+  });
+
   closeCookieNotice();
   document.dispatchEvent(cookieAccept);
 }, false);
@@ -132,16 +155,22 @@ document.body.addEventListener("click", function (event) {
   event.target.classList.add('loading');
   setCookieSettings("cookieControlTracking", "reject");
   setCookieSettings("cookieControlEssential", "reject");
+
+   // Update Google Consent Mode
+   gtag('consent', 'update', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied'
+  });
+
   closeCookieNotice();
   document.dispatchEvent(cookieReject);
 
 }, false);
 
-document.body.addEventListener("click", function (event) {
 
+document.body.addEventListener("click", function (event) {
   if (!event.target.matches(".cookie-control-save-button")) return;
   event.preventDefault();
-
   event.target.classList.add('loading');
 
   var cookieControlTrackingValue = document.querySelector("[name=tracking-cookies]:checked").value;
@@ -149,9 +178,20 @@ document.body.addEventListener("click", function (event) {
 
   setCookieSettings("cookieControlTracking", cookieControlTrackingValue);
   setCookieSettings("cookieControlEssential", cookieControlEssentialValue);
-  window.location.assign(window.location.pathname.slice(0, -1));
 
+  // Determine consent status based on user selections
+  var adStorage = cookieControlTrackingValue === 'accept' ? 'granted' : 'denied';
+  var analyticsStorage = cookieControlTrackingValue === 'accept' ? 'granted' : 'denied';
+
+  // Update Google Consent Mode
+  gtag('consent', 'update', {
+    'ad_storage': adStorage,
+    'analytics_storage': analyticsStorage
+  });
+
+  window.location.assign(window.location.pathname.slice(0, -1));
 }, false);
+
 
 
 
@@ -164,8 +204,3 @@ document.body.addEventListener("click", function (event) {
     .then(window.location.assign(window.location.pathname.slice(0, -1)));
 
 }, false);
-
-
-
-
-
