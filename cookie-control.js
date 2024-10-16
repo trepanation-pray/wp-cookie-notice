@@ -1,5 +1,5 @@
 function setCookieSettings(cookie, value) {
-  document.cookie = cookie + "=" + value + "; expires=Thu, 1 Jan 2099 12:00:00 GMT; path=/";
+    document.cookie = cookie + "=" + value + "; expires=Thu, 1 Jan 2099 12:00:00 GMT; path=/";
 }
 
 function getCookie(name) {
@@ -81,10 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Fetch and display the cookie notice if needed
-  fetch('/wp-json/cookie-control/notice-content')
-    .then(response => response.text())
-    .then(body => {
-      if (!getCookie('cookieControlTracking') || !getCookie('cookieControlMarketing') || !getCookie('cookieControlEssential')) {
+  if (!getCookie('cookieControlTracking') || !getCookie('cookieControlMarketing') || !getCookie('cookieControlEssential')) {
+    fetch('/wp-json/cookie-control/notice-content')
+      .then(response => response.text())
+      .then(body => {
         var html = stringToHTML(body).querySelector('.cookie-control-notice');
         document.body.prepend(html);
         setTimeout(() => {
@@ -93,8 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
           content.focus();
           tabTrappingCookieNotice();
         }, 100);
-      }
-    });
+      });
+  }
 });
 
 function closeCookieNotice() {
@@ -109,7 +109,13 @@ function closeCookieNotice() {
 document.body.addEventListener("click", function (event) {
   if (!event.target.matches(".cookie-control-notice__button--accept")) return;
   event.preventDefault();
-
+  console.log("Consent button clicked"); // Added debug log
+  
+    // Set cookie values
+    setCookieSettings("cookieControlTracking", "accept");
+    setCookieSettings("cookieControlMarketing", "accept");
+    setCookieSettings("cookieControlEssential", "accept");
+    
   // Accept cookies
   if (typeof window.wpConsentApi !== 'undefined' && window.wpConsentApi.consents) {
     window.wpConsentApi.consents.set('analytics', true);
@@ -137,7 +143,11 @@ document.body.addEventListener("click", function (event) {
 document.body.addEventListener("click", function (event) {
   if (!event.target.matches(".cookie-control-notice__button--reject")) return;
   event.preventDefault();
-
+  
+    setCookieSettings("cookieControlTracking", "reject");
+    setCookieSettings("cookieControlMarketing", "reject");
+    setCookieSettings("cookieControlEssential", "reject");
+    
   // Reject cookies
   if (typeof window.wpConsentApi !== 'undefined' && window.wpConsentApi.consents) {
     window.wpConsentApi.consents.set('analytics', false);
@@ -156,10 +166,12 @@ document.body.addEventListener("click", function (event) {
   event.preventDefault();
   event.target.classList.add('loading');
 
-  var cookieControlTrackingValue = document.querySelector("[name=tracking-cookies]:checked").value;
-  var cookieControlMarketingValue = document.querySelector("[name=marketing-cookies]:checked").value;
-  var cookieControlEssentialValue = document.querySelector("[name=essential-cookies]:checked").value;
+  // Get values of cookies with fallback to 'reject'
+  var cookieControlTrackingValue = document.querySelector("[name=tracking-cookies]:checked")?.value || 'reject';
+  var cookieControlMarketingValue = document.querySelector("[name=marketing-cookies]:checked")?.value || 'reject';
+  var cookieControlEssentialValue = document.querySelector("[name=essential-cookies]:checked")?.value || 'reject';
 
+  // Set cookie values
   setCookieSettings("cookieControlTracking", cookieControlTrackingValue);
   setCookieSettings("cookieControlMarketing", cookieControlMarketingValue);
   setCookieSettings("cookieControlEssential", cookieControlEssentialValue);
@@ -172,8 +184,10 @@ document.body.addEventListener("click", function (event) {
   // Update Google Consent Mode
   updateConsentStatus(adStorage, analyticsStorage, marketingStorage);
 
+  // Reload page to apply changes
   window.location.assign(window.location.pathname.slice(0, -1));
 }, false);
+
 
 document.body.addEventListener("click", function (event) {
   if (!event.target.matches(".cookie-control-clear-all-button")) return;
