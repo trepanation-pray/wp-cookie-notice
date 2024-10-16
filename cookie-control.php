@@ -2,12 +2,25 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 2.2.2
+  Version: 2.2.3
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
 */
 
+function insert_consent_mode_script() {
+  ?>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'analytics_storage': 'denied'
+    });
+  </script>
+  <?php
+}
+add_action('wp_head', 'insert_consent_mode_script', 1);
 
 function replace_page_content($content) {
   // Check if it's the page with the specified ID (e.g., 123).
