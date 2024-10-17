@@ -245,9 +245,27 @@ function cookie_control_settings_options_page(  ) {
 
 add_action('wp_enqueue_scripts', 'cookie_control_assets');
 
-function cookie_control_assets() {   
-  wp_enqueue_style( 'cookie_control_style', plugin_dir_url( __FILE__ ) . 'cookie-control.css' );
-  wp_enqueue_script( 'cookie_control_scripts', plugin_dir_url( __FILE__ ) . 'cookie-control.js', array(), false, true );
+function cookie_control_assets() {
+    // Get file modification time for versioning
+    $script_version = filemtime(plugin_dir_path(__FILE__) . 'cookie-control.js');
+    $style_version = filemtime(plugin_dir_path(__FILE__) . 'cookie-control.css');
+    
+    // Enqueue style with versioning to avoid caching
+    wp_enqueue_style(
+        'cookie_control_style',
+        plugin_dir_url(__FILE__) . 'cookie-control.css',
+        array(),
+        $style_version
+    );
+
+    // Enqueue script with versioning to avoid caching
+    wp_enqueue_script(
+        'cookie_control_scripts',
+        plugin_dir_url(__FILE__) . 'cookie-control.js',
+        array(),
+        $script_version,
+        true // Load in footer
+    );
 }
 
 function cookie_control($cookieType) {
