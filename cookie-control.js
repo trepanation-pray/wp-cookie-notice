@@ -1,4 +1,5 @@
 function setCookieSettings(cookie, value) {
+  console.log(`Cookie set: ${cookie} = ${value}`);
     document.cookie = cookie + "=" + value + "; expires=Thu, 1 Jan 2099 12:00:00 GMT; path=/";
 }
 
@@ -50,12 +51,17 @@ function tabTrappingCookieNotice() {
   }
 }
 
-function updateConsentStatus(adStorage, analyticsStorage, marketingStorage) {
+function updateConsentStatus(adStorage, analyticsStorage, marketingStorage, functionalityStorage, securityStorage, personalizationStorage) {
   if (typeof gtag === 'function') {
     gtag('consent', 'update', {
       'ad_storage': adStorage,
       'analytics_storage': analyticsStorage,
-      'marketing_storage': marketingStorage
+      'marketing_storage': marketingStorage,
+      'ad_user_data': marketingStorage,
+      'ad_personalization': marketingStorage,
+      'functionality_storage': functionalityStorage,
+      'security_storage': securityStorage,
+      'personalization_storage': marketingStorage
     });
   } else {
     // If gtag is not yet available, wait for it
@@ -64,13 +70,35 @@ function updateConsentStatus(adStorage, analyticsStorage, marketingStorage) {
       gtag('consent', 'update', {
         'ad_storage': adStorage,
         'analytics_storage': analyticsStorage,
-        'marketing_storage': marketingStorage
+        'marketing_storage': marketingStorage,
+        'ad_user_data': marketingStorage,
+        'ad_personalization': marketingStorage,
+        'functionality_storage': functionalityStorage,
+        'security_storage': securityStorage,
+        'personalization_storage': marketingStorage
       });
     });
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    
+  // Read consent values from cookies
+  const trackingConsent = getCookie('cookieControlTracking') === 'accept' ? 'granted' : 'denied';
+  const marketingConsent = getCookie('cookieControlMarketing') === 'accept' ? 'granted' : 'denied';
+  const essentialConsent = getCookie('cookieControlEssential') === 'accept' ? 'granted' : 'denied';
+
+  // Update Google Consent Mode based on stored consent
+  updateConsentStatus(
+    marketingConsent, // ad_storage
+    trackingConsent, // analytics_storage
+    marketingConsent, // marketing_storage
+    essentialConsent, // functionality_storage
+    essentialConsent, // security_storage
+    marketingConsent  // personalization_storage
+  );
+  
+
   // Initialize consent state if not already set
   if (typeof window.wpConsentApi !== 'undefined' && window.wpConsentApi.consents) {
     if (!window.wpConsentApi.consents.get('analytics')) {
@@ -95,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
       });
   }
+  
 });
 
 function closeCookieNotice() {
@@ -109,6 +138,7 @@ function closeCookieNotice() {
 document.body.addEventListener("click", function (event) {
   if (!event.target.matches(".cookie-control-notice__button--accept")) return;
   event.preventDefault();
+  console.log("Consent button clicked"); // Added debug log
   
     // Set cookie values
     setCookieSettings("cookieControlTracking", "accept");
@@ -169,6 +199,11 @@ document.body.addEventListener("click", function (event) {
   var cookieControlTrackingValue = document.querySelector("[name=tracking-cookies]:checked")?.value || 'reject';
   var cookieControlMarketingValue = document.querySelector("[name=marketing-cookies]:checked")?.value || 'reject';
   var cookieControlEssentialValue = document.querySelector("[name=essential-cookies]:checked")?.value || 'reject';
+
+  // Debug logs to ensure values are correct
+  console.log("Tracking Cookie Value:", cookieControlTrackingValue);
+  console.log("Marketing Cookie Value:", cookieControlMarketingValue);
+  console.log("Essential Cookie Value:", cookieControlEssentialValue);
 
   // Set cookie values
   setCookieSettings("cookieControlTracking", cookieControlTrackingValue);
