@@ -2,11 +2,53 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 3.0.5
+  Version: 3.0.6
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
 */
+
+function insert_gtm_head_script() {
+  $gtm_id = get_option('cookie_control_gtm_id');
+  if (!$gtm_id) {
+      return;
+  }
+  ?>
+  <!-- Google Tag Manager -->
+  <script>
+    (function(w,d,s,l,i){
+      w[l]=w[l]||[];
+      w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+      var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l!='dataLayer'?'&l='+l:'';
+      j.async = true;
+      j.src = 'https://www.googletagmanager.com/gtm.js?id='+i+dl;
+      f.parentNode.insertBefore(j, f);
+    })(window,document,'script','dataLayer','<?php echo esc_js($gtm_id); ?>');
+  </script>
+  <!-- End Google Tag Manager -->
+  <?php
+}
+add_action('wp_head', 'insert_gtm_head_script', 1);
+
+function insert_gtm_body_noscript() {
+  $gtm_id = get_option('cookie_control_gtm_id');
+  if (!$gtm_id) {
+      return;
+  }
+  ?>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo esc_attr($gtm_id); ?>"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe>
+  </noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  <?php
+}
+add_action('wp_body_open', 'insert_gtm_body_noscript');
+
+
 
 function insert_consent_mode_script() {
   // Only insert default consent script if no consent cookies have been set
@@ -74,9 +116,13 @@ function cookie_control_settings_add_admin_menu(  ) {
 }
 
 
-function cookie_control_settings_settings_init(  ) {
+function cookie_control_settings_settings_init() {
 
+  // Register the existing settings array.
   register_setting( 'pluginPage', 'cookie_control_settings_settings' );
+
+  // Register the GTM ID as a separate option.
+  register_setting('pluginPage', 'cookie_control_gtm_id');
 
   add_settings_section(
     'cookie_control_settings_pluginPage_section',
@@ -100,6 +146,15 @@ function cookie_control_settings_settings_init(  ) {
     'pluginPage',
     'cookie_control_settings_pluginPage_section'
   );
+
+  add_settings_field(
+    'cookie_control_gtm_id',
+    __( 'Google Tag Manager ID', 'Cookie Control Settings' ),
+    'cookie_control_gtm_id_render',
+    'pluginPage',
+    'cookie_control_settings_pluginPage_section'
+  );
+
   add_settings_field(
     'cookie_control_page',
     __( 'Select preferences page', 'Cookie Control Settings' ),
@@ -128,7 +183,7 @@ function cookie_control_settings_settings_init(  ) {
     'pluginPage',
     'cookie_control_settings_pluginPage_section'
   );
-  
+
 }
 
 function cookie_control_title_render(  ) {
@@ -145,6 +200,13 @@ function cookie_control_title_render(  ) {
   <input type='text' class="regular-text" name='cookie_control_settings_settings[cookie_control_title]' value='<?= $cookie_control_title; ?>'>
   <?php
 
+}
+function cookie_control_gtm_id_render() {
+  $gtm_id = get_option('cookie_control_gtm_id');
+  ?>
+  <input type='text' class="regular-text" name='cookie_control_gtm_id' value='<?php echo esc_attr($gtm_id); ?>' placeholder="GTM-XXXXXXX">
+  <p class="description"><?php _e('Enter your Google Tag Manager ID (e.g., GTM-W3WWXSP).', 'Cookie Control Settings'); ?></p>
+  <?php
 }
 
 function cookie_control_page_render(  ) {
