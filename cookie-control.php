@@ -2,7 +2,7 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 3.0.6
+  Version: 3.0.7
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
@@ -51,31 +51,32 @@ add_action('wp_body_open', 'insert_gtm_body_noscript');
 
 
 function insert_consent_mode_script() {
-  // Only insert default consent script if no consent cookies have been set
-  if (
-    !isset($_COOKIE['cookieControlTracking']) &&
-    !isset($_COOKIE['cookieControlMarketing']) &&
-    !isset($_COOKIE['cookieControlAdvertising']) &&
-    !isset($_COOKIE['cookieControlEssential'])
-  ) {
-    ?>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('consent', 'default', {
-        'ad_storage': 'denied',
-        'ad_personalization': 'denied',
-        'ad_user_data': 'denied',
-        'analytics_storage': 'denied',
-        'marketing_storage': 'denied',
-        'security_storage': 'denied',
-        'personalization_storage': 'denied'
-      });
-    </script>
-    <?php
-  }
+  // Determine consent status for each category.
+  $trackingConsent    = (isset($_COOKIE['cookieControlTracking']) && $_COOKIE['cookieControlTracking'] == 'accept') ? 'granted' : 'denied';
+  $marketingConsent   = (isset($_COOKIE['cookieControlMarketing']) && $_COOKIE['cookieControlMarketing'] == 'accept') ? 'granted' : 'denied';
+  $advertisingConsent = (isset($_COOKIE['cookieControlAdvertising']) && $_COOKIE['cookieControlAdvertising'] == 'accept') ? 'granted' : 'denied';
+  $essentialConsent   = (isset($_COOKIE['cookieControlEssential']) && $_COOKIE['cookieControlEssential'] == 'accept') ? 'granted' : 'denied';
+  // You can add additional categories (e.g., security, personalization) if needed.
+
+  ?>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    // Update GTM consent mode with cookie values on every page load.
+    gtag('consent', 'update', {
+      'ad_storage': '<?php echo esc_js($advertisingConsent); ?>',
+      'ad_personalization': '<?php echo esc_js($advertisingConsent); ?>',
+      'ad_user_data': '<?php echo esc_js($advertisingConsent); ?>',
+      'analytics_storage': '<?php echo esc_js($trackingConsent); ?>',
+      'marketing_storage': '<?php echo esc_js($marketingConsent); ?>',
+      'security_storage': 'denied', // Default value – update if you add a cookie.
+      'personalization_storage': 'denied' // Default value – update if you add a cookie.
+    });
+  </script>
+  <?php
 }
 add_action('wp_head', 'insert_consent_mode_script', 1);
+
 
 
 
