@@ -2,26 +2,39 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 3.0.0
+  Version: 3.0.5
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
 */
 
 function insert_consent_mode_script() {
-  ?>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('consent', 'default', {
-      'ad_storage': 'denied',
-      'analytics_storage': 'denied',
-      'marketing_storage': 'denied'
-    });
-  </script>
-  <?php
+  // Only insert default consent script if no consent cookies have been set
+  if (
+    !isset($_COOKIE['cookieControlTracking']) &&
+    !isset($_COOKIE['cookieControlMarketing']) &&
+    !isset($_COOKIE['cookieControlAdvertising']) &&
+    !isset($_COOKIE['cookieControlEssential'])
+  ) {
+    ?>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        'ad_storage': 'denied',
+        'ad_personalization': 'denied',
+        'ad_user_data': 'denied',
+        'analytics_storage': 'denied',
+        'marketing_storage': 'denied',
+        'security_storage': 'denied',
+        'personalization_storage': 'denied'
+      });
+    </script>
+    <?php
+  }
 }
 add_action('wp_head', 'insert_consent_mode_script', 1);
+
 
 
 
@@ -223,7 +236,7 @@ function cookie_control_content_render(  ) {
 
 function cookie_control_settings_settings_section_callback(  ) {
 
-  echo __( '<p>The EU law now imposes that a communications provider must get consent from the user when storing or accessing information. This includes the use of cookies.</p><p>If no values are set predefined defaults will be used.</p><p>Code and template references can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice#readme" target="_blank">here</a></p>', 'Cookie Control Settings' );
+  echo __( '<p>The EU law now imposes that a communications provider must get consent from the user when storing or accessing information. This includes the use of cookies and any form of tracking.</p><p>If no values are set predefined defaults will be used.</p><p>Code and template references can be viewed <a href="https://github.com/trepanation-pray/wp-cookie-notice#readme" target="_blank">here</a></p>', 'Cookie Control Settings' );
 
 }
 
@@ -279,6 +292,12 @@ function cookie_control($cookieType) {
       break;
     case 'marketing':
       if( isset( $_COOKIE['cookieControlMarketing']) && $_COOKIE['cookieControlMarketing'] == 'accept' ):
+        return true;
+      endif;
+      return false;
+      break;
+    case 'advertising':
+      if( isset( $_COOKIE['cookieControlAdvertising']) && $_COOKIE['cookieControlAdvertising'] == 'accept' ):
         return true;
       endif;
       return false;
@@ -345,6 +364,31 @@ function marketing_cookies() {
 
 }
 
+add_shortcode('advertising_cookies', 'advertising_cookies');
+
+function advertising_cookies() {
+  $output = '<ul class="cookie-control-settings">';
+
+  $output .= '<li class="cookie-control-settings__item"><input type="radio" value="accept" id="advertising-cookies-accept" name="advertising-cookies" class="cookie-control-settings__input"';
+  
+  if(isset($_COOKIE['cookieControlAdvertising']) && $_COOKIE['cookieControlAdvertising'] == 'accept'):
+    $output .= ' checked="checked"';
+  endif;
+
+  $output .= '><label for="advertising-cookies-accept" class="cookie-control-settings__label">Use cookies that help with tailoring advertising</label></li>';
+
+  $output .= '<li class="cookie-control-settings__item"><input type="radio" value="reject" id="advertising-cookies-reject" name="advertising-cookies" class="cookie-control-settings__input"';
+
+  if(isset($_COOKIE['cookieControlAdvertising']) && $_COOKIE['cookieControlAdvertising'] == 'reject' || !isset($_COOKIE['cookieControlAdvertising']) ):
+    $output .= ' checked="checked"';
+  endif;
+
+  $output .='><label for="advertising-cookies-reject" class="cookie-control-settings__label">Do not use cookies that help with tailoring advertising</label></li>';
+  $output .= '</ul>';
+  return $output;
+
+}
+
 add_shortcode('marketing_cookies', 'marketing_cookies');
 
 function essential_cookies() {
@@ -379,7 +423,7 @@ function accept_additional_button($class = null) {
 add_shortcode('accept_additional_button', 'accept_additional_button');
 
 function save_preferences_button($class = null) {
-  $output .= '<button class="cookie-control-save-button cookie-control-notice__button cookie-control-notice__button--save '.implode($class).'">Save preferences</button>';
+  $output = '<button class="cookie-control-save-button cookie-control-notice__button cookie-control-notice__button--save '.implode($class).'">Save preferences</button>';
   return $output;
 }
 
