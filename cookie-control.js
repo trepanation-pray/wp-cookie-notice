@@ -53,7 +53,6 @@ function tabTrappingCookieNotice() {
 
 function updateConsentStatus(adStorage, analyticsStorage, marketingStorage, functionalityStorage, securityStorage, personalizationStorage) {
   const consentSettings = {
-    'event': 'consent_update',
     'ad_storage': adStorage,
     'analytics_storage': analyticsStorage,
     'marketing_storage': marketingStorage,
@@ -63,11 +62,18 @@ function updateConsentStatus(adStorage, analyticsStorage, marketingStorage, func
     'security_storage': securityStorage,
     'personalization_storage': personalizationStorage
   };
-
+ 
+  // Push the custom event with the consent settings
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    'event': 'consent_update',  // This is the event name
+    ...consentSettings  // Spread the consent settings into the dataLayer object
+  });
+ 
+  // Fire the gtag consent update after pushing the event
   if (typeof gtag === 'function') {
     gtag('consent', 'update', consentSettings);
   } else {
-    window.dataLayer = window.dataLayer || [];
     window.dataLayer.push(function() {
       gtag('consent', 'update', consentSettings);
     });

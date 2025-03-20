@@ -2,7 +2,7 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 3.1.0
+  Version: 3.1.1
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
@@ -52,17 +52,14 @@ add_action('wp_body_open', 'insert_gtm_body_noscript');
 
 function insert_consent_mode_script() {
   // Determine consent status for each category.
-  // If the user has consented, these cookies would be set, otherwise default to 'denied'.
   $trackingConsent    = isset($_COOKIE['cookieControlTracking']) && $_COOKIE['cookieControlTracking'] == 'accept' ? 'granted' : 'denied';
   $marketingConsent   = isset($_COOKIE['cookieControlMarketing']) && $_COOKIE['cookieControlMarketing'] == 'accept' ? 'granted' : 'denied';
   $advertisingConsent = isset($_COOKIE['cookieControlAdvertising']) && $_COOKIE['cookieControlAdvertising'] == 'accept' ? 'granted' : 'denied';
   $essentialConsent   = isset($_COOKIE['cookieControlEssential']) && $_COOKIE['cookieControlEssential'] == 'accept' ? 'granted' : 'denied';
- 
   ?>
 <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
- 
     // Set the default consent settings (before the user has interacted with the consent dialog).
     gtag('consent', 'default', {
       'ad_storage': 'denied',            // Default: denied for advertising cookies
@@ -70,13 +67,13 @@ function insert_consent_mode_script() {
       'ad_user_data': 'denied',          // Default: denied for ad user data
       'analytics_storage': 'denied',     // Default: denied for analytics cookies
       'marketing_storage': 'denied',     // Default: denied for marketing cookies
-      'security_storage': 'denied',      // Default: denied for security cookies (you may want to enable this)
-      'personalization_storage': 'denied' // Default: denied for personalization cookies (you may want to enable this)
+      'security_storage': 'denied',      // Default: denied for security cookies
+      'personalization_storage': 'denied' // Default: denied for personalization cookies
     });
  
     // Update the consent mode based on user consent (if cookies are set).
-    gtag('consent', 'update', {
-      'event': 'consent_update',
+    window.dataLayer.push({
+      'event': 'consent_update',  // Add the event name here
       'ad_storage': '<?php echo esc_js($advertisingConsent); ?>',
       'ad_personalization': '<?php echo esc_js($advertisingConsent); ?>',
       'ad_user_data': '<?php echo esc_js($advertisingConsent); ?>',
@@ -85,6 +82,7 @@ function insert_consent_mode_script() {
       'security_storage': '<?php echo esc_js($essentialConsent); ?>', // Update security consent if applicable
       'personalization_storage': '<?php echo esc_js($essentialConsent); ?>' // Update personalization consent if applicable
     });
+ 
 </script>
 <?php
 }
