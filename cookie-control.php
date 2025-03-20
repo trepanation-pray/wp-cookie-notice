@@ -2,7 +2,7 @@
 /*
   Plugin Name: Cookie Control
   Description: EU compliant cookie control
-  Version: 3.0.9
+  Version: 3.1.0
   Author: Steven Hill
   Author URI: http://www.stevenhill.me
   License: GPL2
@@ -76,6 +76,7 @@ function insert_consent_mode_script() {
  
     // Update the consent mode based on user consent (if cookies are set).
     gtag('consent', 'update', {
+      'event': 'consent_update',
       'ad_storage': '<?php echo esc_js($advertisingConsent); ?>',
       'ad_personalization': '<?php echo esc_js($advertisingConsent); ?>',
       'ad_user_data': '<?php echo esc_js($advertisingConsent); ?>',

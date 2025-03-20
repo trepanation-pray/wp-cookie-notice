@@ -53,6 +53,7 @@ function tabTrappingCookieNotice() {
 
 function updateConsentStatus(adStorage, analyticsStorage, marketingStorage, functionalityStorage, securityStorage, personalizationStorage) {
   const consentSettings = {
+    'event': 'consent_update',
     'ad_storage': adStorage,
     'analytics_storage': analyticsStorage,
     'marketing_storage': marketingStorage,
