@@ -1,250 +1,247 @@
-function setCookieSettings(cookie, value) {
-  console.log(`Cookie set: ${cookie} = ${value}`);
-    document.cookie = cookie + "=" + value + "; expires=Thu, 1 Jan 2099 12:00:00 GMT; path=/";
+/* cookie-control.js */
+
+// --- Unified Cookie Consent JS ---
+// This file integrates our unified consent handling (mapping, persistence, gtag updates)
+// together with the popup functionality that loads the cookie notice and lets the user
+// accept, reject, or manage their preferences.
+
+// Helper: set a cookie (for 365 days)
+function setCookie(name, value, days) {
+  var d = new Date();
+  d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+  var expires = "expires=" + d.toUTCString();
+  document.cookie = name + "=" + value + "; " + expires + "; path=/";
 }
 
+// Helper: retrieve a cookie value by name
 function getCookie(name) {
-  var value = "; " + document.cookie;
-  var parts = value.split("; " + name + "=");
-
-  if (parts.length == 2)
-    return parts
-      .pop()
-      .split(";")
-      .shift();
+  var decodedCookies = decodeURIComponent(document.cookie);
+  var cookieArray = decodedCookies.split(';');
+  for (var i = 0; i < cookieArray.length; i++) {
+    var cookie = cookieArray[i].trim();
+    if (cookie.indexOf(name + "=") === 0) {
+      return cookie.substring((name + "=").length, cookie.length);
+    }
+  }
+  return "";
 }
 
-var stringToHTML = function (str) {
+// Update a specific consent setting via gtag and persist in a cookie.
+function updateConsent(consentType, consentValue) {
+  if (typeof gtag === 'function') {
+    gtag('consent', 'update', { [consentType]: consentValue });
+  }
+  setCookie(consentType, consentValue, 365);
+}
+
+// Load saved consent preferences and update the UI radio buttons.
+function loadConsentPreferences() {
+  var mapping = {
+    'analytics_storage': 'tracking-cookies',
+    'marketing_storage': 'marketing-cookies',
+    'ad_storage': 'advertising-cookies',
+    'ad_personalization': 'advertising-cookies',
+    'functionality_storage': 'essential-cookies'
+  };
+
+  for (var consentKey in mapping) {
+    var radioGroupName = mapping[consentKey];
+    var storedValue = getCookie(consentKey) || 'denied'; // default to 'denied'
+    var radioValue = storedValue === 'granted' ? 'accept' : 'reject';
+    var inputElem = document.querySelector('input[name="' + radioGroupName + '"][value="' + radioValue + '"]');
+    if (inputElem) {
+      inputElem.checked = true;
+    }
+    updateConsent(consentKey, storedValue);
+  }
+}
+
+// Convert an HTML string into a DocumentFragment.
+function stringToHTML(str) {
   var parser = new DOMParser();
   var doc = parser.parseFromString(str, 'text/html');
   return doc.body;
-};
+}
 
-// Trap tabbing in overly version
+// Trap tabbing within the overlay popup (for accessibility).
 function tabTrappingCookieNotice() {
   var overlay = document.body.querySelector('.cookie-control-notice--overlay');
   if (overlay) {
     var cookieNoticeTabList = document.querySelectorAll('.cookie-control-notice__landing a, .cookie-control-notice__landing button');
-    
-    cookieNoticeTabList[0].focus();
-    cookieNoticeTabList[0].blur();
-
-    cookieNoticeTabList[cookieNoticeTabList.length - 1].addEventListener('keydown', (event) => {
-      if (event.shiftKey && event.keyCode == 9) {
-        event.preventDefault();
-        cookieNoticeTabList[cookieNoticeTabList.length - 2].focus();
-      } else if (event.keyCode == 9) {
-        event.preventDefault();
-        cookieNoticeTabList[0].focus();
-      }
-    }, false);
-
-    cookieNoticeTabList[0].addEventListener('keydown', (event) => {
-      if (event.shiftKey && event.keyCode == 9) {
-        event.preventDefault();
-        cookieNoticeTabList[cookieNoticeTabList.length - 1].focus();
-      } else if (event.keyCode == 9) {
-        event.preventDefault();
-        cookieNoticeTabList[1].focus();
-      }
-    }, false);
+    if (cookieNoticeTabList.length > 0) {
+      cookieNoticeTabList[0].focus();
+      cookieNoticeTabList[0].blur();
+      cookieNoticeTabList[cookieNoticeTabList.length - 1].addEventListener('keydown', function(event) {
+        if (event.shiftKey && event.keyCode === 9) {
+          event.preventDefault();
+          cookieNoticeTabList[cookieNoticeTabList.length - 2].focus();
+        } else if (event.keyCode === 9) {
+          event.preventDefault();
+          cookieNoticeTabList[0].focus();
+        }
+      }, false);
+      cookieNoticeTabList[0].addEventListener('keydown', function(event) {
+        if (event.shiftKey && event.keyCode === 9) {
+          event.preventDefault();
+          cookieNoticeTabList[cookieNoticeTabList.length - 1].focus();
+        } else if (event.keyCode === 9) {
+          event.preventDefault();
+          cookieNoticeTabList[1].focus();
+        }
+      }, false);
+    }
   }
 }
 
-function updateConsentStatus(adStorage, analyticsStorage, marketingStorage, functionalityStorage, securityStorage, personalizationStorage) {
-  const consentSettings = {
-    'ad_storage': adStorage,
-    'analytics_storage': analyticsStorage,
-    'marketing_storage': marketingStorage,
-    'ad_user_data': adStorage,
-    'ad_personalization': adStorage, // using advertising consent for ad personalization
-    'functionality_storage': functionalityStorage,
-    'security_storage': securityStorage,
-    'personalization_storage': personalizationStorage
-  };
- 
-  // Push the custom event with the consent settings
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({
-    'event': 'consent_update',  // This is the event name
-    ...consentSettings  // Spread the consent settings into the dataLayer object
-  });
- 
-  // Fire the gtag consent update after pushing the event
-  if (typeof gtag === 'function') {
-    gtag('consent', 'update', consentSettings);
+// Close the cookie notice popup.
+function closeCookieNotice() {
+  setTimeout(function () {
+    var notice = document.body.querySelector(".cookie-control-notice");
+    if (notice) notice.classList.remove("active");
+  }, 1000);
+  setTimeout(function () {
+    var notice = document.body.querySelector(".cookie-control-notice");
+    if (notice) notice.remove();
+  }, 1500);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadConsentPreferences();
+
+  // Only show the popup if the decision cookie is not set.
+  if (!getCookie('cookie_control_decided')) {
+    console.log("Cookie notice not decided yet. Loading popup...");
+    fetch('/wp-json/cookie-control/notice-content')
+      .then(response => response.text())
+      .then(body => {
+        console.log("Fetched body:", body);
+        var parsed = stringToHTML(body);
+        console.log("Parsed HTML:", parsed);
+        var noticeElement = parsed.querySelector('.cookie-control-notice');
+        if (noticeElement) {
+          console.log("Found notice element:", noticeElement);
+          try {
+            document.body.prepend(noticeElement);
+            console.log("Popup element prepended to body.");
+          } catch(e) {
+            console.log("Prepend failed, attempting appendChild:", e);
+            document.body.appendChild(noticeElement);
+          }
+          setTimeout(function() {
+            noticeElement.classList.add('active');
+            var content = document.body.querySelector('.cookie-control-notice__container');
+            if (content) content.focus();
+            tabTrappingCookieNotice();
+          }, 100);
+        } else {
+          console.log("No element with class 'cookie-control-notice' found in the fetched HTML.");
+        }
+      })
+      .catch(function(err) {
+        console.error("Error fetching cookie notice:", err);
+      });
   } else {
-    window.dataLayer.push(function() {
-      gtag('consent', 'update', consentSettings);
+    console.log("Cookie notice already decided.");
+  }
+
+  // "Save preferences" button event listener.
+  var saveButton = document.querySelector('.cookie-control-save-button');
+  if (saveButton) {
+    saveButton.addEventListener('click', function() {
+      var trackingConsent = document.querySelector('input[name="tracking-cookies"]:checked');
+      var marketingConsent = document.querySelector('input[name="marketing-cookies"]:checked');
+      var advertisingConsent = document.querySelector('input[name="advertising-cookies"]:checked');
+      var essentialConsent = document.querySelector('input[name="essential-cookies"]:checked');
+
+      updateConsent('analytics_storage', (trackingConsent && trackingConsent.value === 'accept') ? 'granted' : 'denied');
+      updateConsent('marketing_storage', (marketingConsent && marketingConsent.value === 'accept') ? 'granted' : 'denied');
+      var advStatus = (advertisingConsent && advertisingConsent.value === 'accept') ? 'granted' : 'denied';
+      updateConsent('ad_storage', advStatus);
+      updateConsent('ad_personalization', advStatus);
+      updateConsent('functionality_storage', (essentialConsent && essentialConsent.value === 'accept') ? 'granted' : 'denied');
+
+      // Mark that the user has decided.
+      setCookie('cookie_control_decided', 'true', 365);
+      closeCookieNotice();
+      // No page reload – changes are applied on the same page.
     });
   }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-    
-  // Read consent values from cookies with defaults (if cookies are not set, default to 'denied')
-  const trackingConsent = getCookie('cookieControlTracking') === 'accept' ? 'granted' : 'denied';
-  const marketingConsent = getCookie('cookieControlMarketing') === 'accept' ? 'granted' : 'denied';
-  const advertisingConsent = getCookie('cookieControlAdvertising') === 'accept' ? 'granted' : 'denied';
-  const essentialConsent = getCookie('cookieControlEssential') === 'accept' ? 'granted' : 'denied';
-  const securityConsent = getCookie('cookieControlSecurity') === 'accept' ? 'granted' : 'denied';
-  const personalizationConsent = getCookie('cookieControlPersonalization') === 'accept' ? 'granted' : 'denied';  
+  // "Clear all cookies" button event listener.
+  var clearButton = document.querySelector('.cookie-control-clear-all-button');
+  if (clearButton) {
+    clearButton.addEventListener('click', function() {
+      var consentKeys = ['analytics_storage', 'marketing_storage', 'ad_storage', 'ad_personalization', 'functionality_storage', 'cookie_control_decided'];
+      for (var i = 0; i < consentKeys.length; i++) {
+        document.cookie = consentKeys[i] + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+      }
+      // Instead of reloading the page, you might choose to show the popup again.
+      closeCookieNotice();
+    });
+  }
 
-  // Update Google Consent Mode based on stored consent
-  updateConsentStatus(
-    advertisingConsent,      // ad_storage (advertising)
-    trackingConsent,         // analytics_storage
-    marketingConsent,        // marketing_storage
-    essentialConsent,        // functionality_storage
-    securityConsent,         // security_storage
-    personalizationConsent   // personalization_storage
-  );
-    
+  // Accept button event handler: set all consent cookies to "granted."
+  document.body.addEventListener("click", function (event) {
+    if (!event.target.matches(".cookie-control-notice__button--accept")) return;
+    event.preventDefault();
+    console.log("Consent accept button clicked");
 
-  // Initialize consent state if not already set
-  if (typeof window.wpConsentApi !== 'undefined' && window.wpConsentApi.consents) {
-    if (!window.wpConsentApi.consents.get('analytics')) {
+    updateConsent('analytics_storage', 'granted');
+    updateConsent('marketing_storage', 'granted');
+    updateConsent('ad_storage', 'granted');
+    updateConsent('ad_personalization', 'granted');
+    updateConsent('functionality_storage', 'granted');
+    updateConsent('security_storage', 'granted');
+    updateConsent('personalization_storage', 'granted');
+
+    setCookie('cookie_control_decided', 'true', 365);
+
+    if (typeof window.wpConsentApi !== 'undefined' && window.wpConsentApi.consents) {
+      window.wpConsentApi.consents.set('analytics', true);
+      window.wpConsentApi.consents.set('functional', true);
+      window.wpConsentApi.consents.set('marketing', true);
+    }
+
+    closeCookieNotice();
+    // No page reload.
+  }, false);
+
+  // Reject button event handler: set all consent cookies to "denied."
+  document.body.addEventListener("click", function (event) {
+    if (!event.target.matches(".cookie-control-notice__button--reject")) return;
+    event.preventDefault();
+
+    updateConsent('analytics_storage', 'denied');
+    updateConsent('marketing_storage', 'denied');
+    updateConsent('ad_storage', 'denied');
+    updateConsent('ad_personalization', 'denied');
+    updateConsent('functionality_storage', 'denied');
+    updateConsent('security_storage', 'denied');
+    updateConsent('personalization_storage', 'denied');
+
+    setCookie('cookie_control_decided', 'true', 365);
+
+    if (typeof window.wpConsentApi !== 'undefined' && window.wpConsentApi.consents) {
       window.wpConsentApi.consents.set('analytics', false);
       window.wpConsentApi.consents.set('functional', false);
       window.wpConsentApi.consents.set('marketing', false);
     }
-  }
 
-  // Fetch and display the cookie notice if needed
-  if (!getCookie('cookieControlTracking') || !getCookie('cookieControlMarketing') || !getCookie('cookieControlAdvertising') || !getCookie('cookieControlEssential')) {
-    fetch('/wp-json/cookie-control/notice-content')
-      .then(response => response.text())
-      .then(body => {
-        var html = stringToHTML(body).querySelector('.cookie-control-notice');
-        document.body.prepend(html);
-        setTimeout(() => {
-          html.classList.add('active');
-          var content = document.body.querySelector('.cookie-control-notice__container');
-          content.focus();
-          tabTrappingCookieNotice();
-        }, 100);
-      });
-  }
-  
+    closeCookieNotice();
+    // No page reload.
+  }, false);
+
+  // Manage button event handler: toggle display between landing and manage sections.
+  document.body.addEventListener("click", function (event) {
+    if (!event.target.matches(".cookie-control-notice__button--manage")) return;
+    event.preventDefault();
+
+    var cookieControlLanding = document.querySelector(".cookie-control-notice__landing");
+    var cookieControlManage = document.querySelector(".cookie-control-notice__manage");
+
+    if (cookieControlLanding && cookieControlManage) {
+      cookieControlLanding.style.display = 'none';
+      cookieControlManage.style.display = 'block';
+    }
+  }, false);
 });
-
-function closeCookieNotice() {
-  setTimeout(function () {
-    document.body.querySelector(".cookie-control-notice").classList.remove("active");
-  }, 1000);
-  setTimeout(function () {
-    document.body.querySelector(".cookie-control-notice").remove();
-  }, 1500);
-}
-
-// Accept button event handler: set all cookies to "accept"
-document.body.addEventListener("click", function (event) {
-  if (!event.target.matches(".cookie-control-notice__button--accept")) return;
-  event.preventDefault();
-  console.log("Consent button clicked"); // Debug log
-
-  setCookieSettings("cookieControlTracking", "accept");
-  setCookieSettings("cookieControlMarketing", "accept");
-  setCookieSettings("cookieControlAdvertising", "accept"); // Separate advertising cookie
-  setCookieSettings("cookieControlEssential", "accept");
-  setCookieSettings("cookieControlSecurity", "accept");
-  setCookieSettings("cookieControlPersonalization", "accept");
-
-  if (typeof window.wpConsentApi !== 'undefined' && window.wpConsentApi.consents) {
-    window.wpConsentApi.consents.set('analytics', true);
-    window.wpConsentApi.consents.set('functional', true);
-    window.wpConsentApi.consents.set('marketing', true);
-  }
-
-  updateConsentStatus('granted', 'granted', 'granted', 'granted', 'granted', 'granted');
-  closeCookieNotice();
-}, false);
-
-document.body.addEventListener("click", function (event) {
-  if (!event.target.matches(".cookie-control-notice__button--manage")) return;
-  event.preventDefault();
-
-  var cookieControlLanding = document.querySelector(".cookie-control-notice__landing");
-  var cookieControlManage = document.querySelector(".cookie-control-notice__manage");
-
-  cookieControlLanding.style.display = 'none';
-  cookieControlManage.style.display = 'block';
-}, false);
-
-
-// Reject button event handler: set all cookies to "reject"
-document.body.addEventListener("click", function (event) {
-  if (!event.target.matches(".cookie-control-notice__button--reject")) return;
-  event.preventDefault();
-
-  setCookieSettings("cookieControlTracking", "reject");
-  setCookieSettings("cookieControlMarketing", "reject");
-  setCookieSettings("cookieControlAdvertising", "reject"); // Separate advertising cookie
-  setCookieSettings("cookieControlEssential", "reject");
-  setCookieSettings("cookieControlSecurity", "reject");
-  setCookieSettings("cookieControlPersonalization", "reject");
-
-  if (typeof window.wpConsentApi !== 'undefined' && window.wpConsentApi.consents) {
-    window.wpConsentApi.consents.set('analytics', false);
-    window.wpConsentApi.consents.set('functional', false);
-    window.wpConsentApi.consents.set('marketing', false);
-  }
-
-  updateConsentStatus('denied', 'denied', 'denied', 'denied', 'denied', 'denied');
-  closeCookieNotice();
-}, false);
-
-
-// Save button event handler (for manual consent management)
-document.body.addEventListener("click", function (event) {
-  if (!event.target.matches(".cookie-control-save-button")) return;
-  event.preventDefault();
-  event.target.classList.add('loading');
-
-  // Retrieve user selections with a fallback to 'reject'
-  var cookieControlTrackingValue = document.querySelector("[name=tracking-cookies]:checked")?.value || 'reject';
-  var cookieControlMarketingValue = document.querySelector("[name=marketing-cookies]:checked")?.value || 'reject';
-  var cookieControlAdvertisingValue = document.querySelector("[name=advertising-cookies]:checked")?.value || 'reject';
-  var cookieControlEssentialValue = document.querySelector("[name=essential-cookies]:checked")?.value || 'reject';
-  var cookieControlSecurityValue = document.querySelector("[name=security-cookies]:checked")?.value || 'reject';
-  var cookieControlPersonalizationValue = document.querySelector("[name=personalization-cookies]:checked")?.value || 'reject';
-
-  console.log("Tracking Cookie Value:", cookieControlTrackingValue);
-  console.log("Marketing Cookie Value:", cookieControlMarketingValue);
-  console.log("Advertising Cookie Value:", cookieControlAdvertisingValue);
-  console.log("Essential Cookie Value:", cookieControlEssentialValue);
-  console.log("Security Cookie Value:", cookieControlSecurityValue);
-  console.log("Personalization Cookie Value:", cookieControlPersonalizationValue);
-
-  // Set cookie values accordingly
-  setCookieSettings("cookieControlTracking", cookieControlTrackingValue);
-  setCookieSettings("cookieControlMarketing", cookieControlMarketingValue);
-  setCookieSettings("cookieControlAdvertising", cookieControlAdvertisingValue);
-  setCookieSettings("cookieControlEssential", cookieControlEssentialValue);
-  setCookieSettings("cookieControlSecurity", cookieControlSecurityValue);
-  setCookieSettings("cookieControlPersonalization", cookieControlPersonalizationValue);
-
-  // Define consent statuses based on user selections
-  const adStorage = cookieControlAdvertisingValue === 'accept' ? 'granted' : 'denied';
-  const analyticsStorage = cookieControlTrackingValue === 'accept' ? 'granted' : 'denied';
-  const marketingStorage = cookieControlMarketingValue === 'accept' ? 'granted' : 'denied';
-  const functionalityStorage = cookieControlEssentialValue === 'accept' ? 'granted' : 'denied';
-  const securityStorage = cookieControlSecurityValue === 'accept' ? 'granted' : 'denied';
-  const personalizationStorage = cookieControlPersonalizationValue === 'accept' ? 'granted' : 'denied';
-
-  // Update Google Consent Mode with the chosen settings
-  updateConsentStatus(adStorage, analyticsStorage, marketingStorage, functionalityStorage, securityStorage, personalizationStorage);
-
-  // Reload page to apply changes
-  window.location.assign(window.location.pathname.slice(0, -1));
-}, false);
-
-
-
-document.body.addEventListener("click", function (event) {
-  if (!event.target.matches(".cookie-control-clear-all-button")) return;
-  event.preventDefault();
-  event.target.classList.add('loading');
-  fetch('/wp-json/cookie-control/clear-cookies')
-    .then(window.location.assign(window.location.pathname.slice(0, -1)));
-}, false);
